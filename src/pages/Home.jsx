@@ -213,6 +213,7 @@ function Home() {
         <DistanceLine
           positionsRef={positionsRef}
           selectedId={selectedAsteroid?.id || null}
+          selectedName={selectedAsteroid?.name || ''}
         />
 
         <CameraController

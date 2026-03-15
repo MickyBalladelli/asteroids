@@ -7,7 +7,7 @@ import { EARTH_RADIUS_UNITS } from '../utils/orbitMath'
 const EARTH_RADIUS_KM = 6371
 const KM_PER_UNIT = EARTH_RADIUS_KM / EARTH_RADIUS_UNITS
 
-function DistanceLine({ positionsRef, selectedId }) {
+function DistanceLine({ positionsRef, selectedId, selectedName }) {
   const lineRef = useRef()
   const groupRef = useRef()
   const labelGroupRef = useRef()
@@ -92,8 +92,22 @@ function DistanceLine({ positionsRef, selectedId }) {
               whiteSpace: 'nowrap',
               userSelect: 'none',
               boxShadow: '0 0 10px rgba(101,249,255,0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
             }}
           >
+            <span
+              style={{
+                color: '#b8f6ff',
+                fontSize: 10,
+                fontWeight: 600,
+                opacity: 0.95,
+                letterSpacing: 0.2,
+              }}
+            >
+              {selectedName || 'Selected Asteroid'}
+            </span>
             <span ref={textRef}>—</span>
           </div>
         </Html>
