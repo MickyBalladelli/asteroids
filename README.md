@@ -167,20 +167,7 @@ npm run dev
 - Endpoint used: NEO feed (`/neo/rest/v1/feed`)
 - Date range must stay within NASA NEO feed limits.
 
-## Screenshot Placeholders
-
-- `docs/screenshots/main-view.png`
-- `docs/screenshots/hazard-mode.png`
-- `docs/screenshots/info-panel.png`
-
-Recommended capture set:
-
-- `docs/screenshots/radar-visual-mode.png` (Visual preset with zone bands)
-- `docs/screenshots/radar-risk-weighted.png` (threat-colored emphasis)
-- `docs/screenshots/radar-imminent-only.png` (filtered near-term threats)
-- `docs/screenshots/top-threat-cards.png` (header quick-select panel)
-- `docs/screenshots/selected-threat-panel.png` (info panel with threat chip)
-
+![ Asteroids Tracker ](docs/tracker.png) 
 ## GIF Demo Suggestion
 
 Record a short walkthrough showing:
