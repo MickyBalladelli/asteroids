@@ -69,49 +69,51 @@ function DistanceLine({ positionsRef, selectedId, selectedName }) {
           depthTest={false}
         />
       </line>
-      <group ref={labelGroupRef}>
-        <Html
-          center
-          style={{
-            pointerEvents: 'none',
-            transform: 'translate(0, -32px)',
-          }}
-          zIndexRange={[120, 0]}
-          occlude={false}
-        >
-          <div
+      {selectedName && ( 
+        <group ref={labelGroupRef}>
+          <Html
+            center
             style={{
-              background: 'rgba(6,11,24,0.92)',
-              border: '1px solid rgba(101,249,255,0.75)',
-              borderRadius: 6,
-              padding: '3px 9px',
-              color: '#65f9ff',
-              fontSize: 12,
-              fontWeight: 700,
-              fontFamily: 'monospace',
-              whiteSpace: 'nowrap',
-              userSelect: 'none',
-              boxShadow: '0 0 10px rgba(101,249,255,0.3)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
+              pointerEvents: 'none',
+              transform: 'translate(0, -32px)',
             }}
+            zIndexRange={[120, 0]}
+            occlude={false}
           >
-            <span
+            <div
               style={{
-                color: '#b8f6ff',
-                fontSize: 10,
-                fontWeight: 600,
-                opacity: 0.95,
-                letterSpacing: 0.2,
+                background: 'rgba(6,11,24,0.92)',
+                border: '1px solid rgba(101,249,255,0.75)',
+                borderRadius: 6,
+                padding: '3px 9px',
+                color: '#65f9ff',
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: 'monospace',
+                whiteSpace: 'nowrap',
+                userSelect: 'none',
+                boxShadow: '0 0 10px rgba(101,249,255,0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
               }}
             >
-              {selectedName || 'Selected Asteroid'}
-            </span>
-            <span ref={textRef}>—</span>
-          </div>
-        </Html>
-      </group>
+              <span
+                style={{
+                  color: '#b8f6ff',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  opacity: 0.95,
+                  letterSpacing: 0.2,
+                }}
+              >
+                {selectedName || 'Selected Asteroid'}
+              </span>
+              <span ref={textRef}>—</span>
+            </div>
+          </Html>
+        </group>
+      )}
     </group>
   )
 }

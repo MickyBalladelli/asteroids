@@ -69,13 +69,8 @@ function Home() {
   const daysAhead = PRESET_TO_DAYS[timePreset]
   const { asteroids, loading, stats } = useAsteroids(daysAhead, atScale)
 
-  const filteredAsteroids = useMemo(() => {
+  const filterScopedAsteroids = useMemo(() => {
     let result = asteroids
-
-    if (searchText) {
-      const lower = searchText.toLowerCase()
-      result = result.filter((a) => a.name.toLowerCase().includes(lower))
-    }
 
     if (hazardFilter === 'hazardous') {
       result = result.filter((a) => a.hazardous)
@@ -92,7 +87,13 @@ function Home() {
     }
 
     return result
-  }, [asteroids, searchText, hazardFilter, sizeFilter])
+  }, [asteroids, hazardFilter, sizeFilter])
+
+  const filteredAsteroids = useMemo(() => {
+    if (!searchText) return filterScopedAsteroids
+    const lower = searchText.toLowerCase()
+    return filterScopedAsteroids.filter((a) => a.name.toLowerCase().includes(lower))
+  }, [filterScopedAsteroids, searchText])
 
   const maxThreatScore = useMemo(() => {
     if (filteredAsteroids.length === 0) return 0
@@ -112,18 +113,21 @@ function Home() {
   }, [filteredAsteroids, hazardMode, radarMode])
 
   const searchOptions = useMemo(
-    () => [...new Set(asteroids.map((a) => a.name))].sort((a, b) => a.localeCompare(b)),
-    [asteroids],
+    () =>
+      [...new Set(filterScopedAsteroids.map((a) => a.name))].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [filterScopedAsteroids],
   )
 
   const handleSearchSelect = useCallback(
     (name) => {
-      const match = asteroids.find((asteroid) => asteroid.name === name)
+      const match = filterScopedAsteroids.find((asteroid) => asteroid.name === name)
       if (match) {
         setSelectedAsteroid(match)
       }
     },
-    [asteroids],
+    [filterScopedAsteroids],
   )
 
   const selectedIndex = useMemo(() => {
