@@ -4,8 +4,9 @@ import * as THREE from 'three'
 import { pointOnOrbitTo } from '../utils/orbitMath'
 import AsteroidTrail from './AsteroidTrail'
 
-function Asteroid({ asteroid, hazardMode, onSelect }) {
+function Asteroid({ asteroid, hazardMode, onSelect, isSelected }) {
   const meshRef = useRef()
+  const ringRef = useRef()
   const positionRef = useRef(new THREE.Vector3())
   const tRef = useRef(Math.random())
   const smoothScaleRef = useRef(0.1)
@@ -63,6 +64,12 @@ function Asteroid({ asteroid, hazardMode, onSelect }) {
       meshRef.current.scale.setScalar(smoothScaleRef.current)
       meshRef.current.material.emissiveIntensity = smoothEmissiveRef.current
     }
+
+    if (ringRef.current) {
+      ringRef.current.position.copy(pos)
+      ringRef.current.scale.setScalar(smoothScaleRef.current * 2.2)
+      ringRef.current.visible = isSelected
+    }
   })
 
   const handleClick = useCallback(
@@ -86,6 +93,23 @@ function Asteroid({ asteroid, hazardMode, onSelect }) {
           metalness={0.12}
           emissive={hazardMode && asteroid.hazardous ? '#ff1515' : '#526cff'}
           emissiveIntensity={0.25}
+        />
+      </mesh>
+
+      <mesh
+        ref={ringRef}
+        visible={false}
+        rotation-x={-Math.PI / 2}
+        raycast={() => null}
+      >
+        <ringGeometry args={[0.8, 1, 32]} />
+        <meshBasicMaterial
+          color="#65F9FF"
+          transparent
+          opacity={0.6}
+          depthTest={false}
+          depthWrite={false}
+          side={THREE.DoubleSide}
         />
       </mesh>
 

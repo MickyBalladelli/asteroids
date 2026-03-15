@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stars } from '@react-three/drei'
 import Box from '@mui/material/Box'
@@ -8,6 +8,7 @@ import AsteroidField from '../components/AsteroidField'
 import Radar from '../components/Radar'
 import TopBar from '../components/TopBar'
 import InfoPanel from '../components/InfoPanel'
+import SearchFilter from '../components/SearchFilter'
 import useAsteroids from '../hooks/useAsteroids'
 
 const PRESET_TO_DAYS = [0, 7, 30]
@@ -57,9 +58,54 @@ function Home() {
   const [timePreset, setTimePreset] = useState(1)
   const [hazardMode, setHazardMode] = useState(false)
   const [selectedAsteroid, setSelectedAsteroid] = useState(null)
+  const [searchText, setSearchText] = useState('')
+  const [hazardFilter, setHazardFilter] = useState('all')
+  const [sizeFilter, setSizeFilter] = useState('all')
 
   const daysAhead = PRESET_TO_DAYS[timePreset]
   const { asteroids, loading, stats } = useAsteroids(daysAhead)
+
+  const filteredAsteroids = useMemo(() => {
+    let result = asteroids
+
+    if (searchText) {
+      const lower = searchText.toLowerCase()
+      result = result.filter((a) => a.name.toLowerCase().includes(lower))
+    }
+
+    if (hazardFilter === 'hazardous') {
+      result = result.filter((a) => a.hazardous)
+    } else if (hazardFilter === 'safe') {
+      result = result.filter((a) => !a.hazardous)
+    }
+
+    if (sizeFilter === 'small') {
+      result = result.filter((a) => a.diameterKm < 0.1)
+    } else if (sizeFilter === 'medium') {
+      result = result.filter((a) => a.diameterKm >= 0.1 && a.diameterKm < 0.5)
+    } else if (sizeFilter === 'large') {
+      result = result.filter((a) => a.diameterKm >= 0.5)
+    }
+
+    return result
+  }, [asteroids, searchText, hazardFilter, sizeFilter])
+
+  const selectedIndex = useMemo(() => {
+    if (!selectedAsteroid) return -1
+    return filteredAsteroids.findIndex((a) => a.id === selectedAsteroid.id)
+  }, [filteredAsteroids, selectedAsteroid])
+
+  const handlePrev = useCallback(() => {
+    if (filteredAsteroids.length === 0) return
+    const idx = selectedIndex <= 0 ? filteredAsteroids.length - 1 : selectedIndex - 1
+    setSelectedAsteroid(filteredAsteroids[idx])
+  }, [filteredAsteroids, selectedIndex])
+
+  const handleNext = useCallback(() => {
+    if (filteredAsteroids.length === 0) return
+    const idx = selectedIndex >= filteredAsteroids.length - 1 ? 0 : selectedIndex + 1
+    setSelectedAsteroid(filteredAsteroids[idx])
+  }, [filteredAsteroids, selectedIndex])
 
   return (
     <Box
@@ -76,10 +122,29 @@ function Home() {
         onTimePresetChange={setTimePreset}
         hazardMode={hazardMode}
         onToggleHazard={setHazardMode}
-        asteroidCount={stats.total}
+        asteroidCount={filteredAsteroids.length}
         hazardousCount={stats.hazardous}
         loading={loading}
       />
+
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 100,
+          left: 16,
+          zIndex: 20,
+          pointerEvents: 'auto',
+        }}
+      >
+        <SearchFilter
+          searchText={searchText}
+          onSearchChange={setSearchText}
+          hazardFilter={hazardFilter}
+          onHazardFilterChange={setHazardFilter}
+          sizeFilter={sizeFilter}
+          onSizeFilterChange={setSizeFilter}
+        />
+      </Box>
 
       <Box
         sx={{
@@ -90,7 +155,15 @@ function Home() {
           pointerEvents: 'none',
         }}
       >
-        {selectedAsteroid && <InfoPanel asteroid={selectedAsteroid} />}
+        {selectedAsteroid && (
+          <InfoPanel
+            asteroid={selectedAsteroid}
+            currentIndex={selectedIndex}
+            totalCount={filteredAsteroids.length}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
+        )}
       </Box>
 
       <Canvas
@@ -122,9 +195,10 @@ function Home() {
         <Earth />
         <Radar enabled={hazardMode} />
         <AsteroidField
-          asteroids={asteroids}
+          asteroids={filteredAsteroids}
           hazardMode={hazardMode}
           onSelect={setSelectedAsteroid}
+          selectedId={selectedAsteroid?.id || null}
         />
 
         <OrbitControls

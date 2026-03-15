@@ -2,7 +2,7 @@ import { memo } from 'react'
 import Asteroid from './Asteroid'
 import AsteroidOrbit from './AsteroidOrbit'
 
-function AsteroidField({ asteroids, hazardMode, onSelect }) {
+function AsteroidField({ asteroids, hazardMode, onSelect, selectedId }) {
   return (
     <group>
       {asteroids.map((asteroid) => (
@@ -16,6 +16,7 @@ function AsteroidField({ asteroids, hazardMode, onSelect }) {
             asteroid={asteroid}
             hazardMode={hazardMode}
             onSelect={onSelect}
+            isSelected={asteroid.id === selectedId}
           />
         </group>
       ))}

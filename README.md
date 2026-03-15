@@ -10,9 +10,11 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
 - Hazard-aware coloring and glow intensity
 - Orbit trajectories and fading asteroid trails
 - Hover labels and click-to-inspect asteroid panel
+- Asteroid search and filter by name, hazard level, and size
+- Previous / next navigation between asteroids with selection highlight
 - Time range slider: today, next 7 days, next 30 days
 - Radar hazard mode with animated ring scans
-- Cinematic deep-space background and bloom post-processing
+- Cinematic deep-space background
 
 ## Architecture
 
@@ -36,7 +38,7 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
 - `src/components/AsteroidField.jsx`
   - Maps over asteroid data to render orbit lines + asteroid bodies.
 - `src/components/Asteroid.jsx`
-  - Per-asteroid animation loop, selection, hover labels, and glow behavior.
+  - Per-asteroid animation loop, selection highlight ring, and glow behavior.
 - `src/components/AsteroidTrail.jsx`
   - Recent-position history rendered as additive fading trail.
 - `src/components/Radar.jsx`
@@ -47,7 +49,9 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
 - `src/components/TopBar.jsx`
   - Displays title, time slider, radar toggle, counters, loading indicator.
 - `src/components/InfoPanel.jsx`
-  - Displays selected asteroid details with smooth fade animation.
+  - Displays selected asteroid details with smooth fade animation and previous/next navigation.
+- `src/components/SearchFilter.jsx`
+  - Search input and dropdowns to filter asteroids by name, hazard level, and size.
 - Material UI components and `sx` styling for a consistent UI layer.
 
 ## Project Structure
@@ -61,6 +65,7 @@ src/
     AsteroidTrail.jsx
     AsteroidField.jsx
     Radar.jsx
+    SearchFilter.jsx
     InfoPanel.jsx
     TimeSlider.jsx
     TopBar.jsx
@@ -129,7 +134,6 @@ Recommended tools: Screen Studio, Kap, or OBS.
 ## Future Features
 
 - Realistic orbital mechanics with ephemeris models
-- Asteroid search and filter by name, hazard level, and size
 - VR mode for immersive asteroid exploration
 - Collision prediction and simulation overlays
 - Earth satellite and debris tracking layers

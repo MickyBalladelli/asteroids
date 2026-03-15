@@ -4,6 +4,9 @@ import Fade from '@mui/material/Fade'
 import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 function rowLabel(value, unit = '') {
   if (Number.isNaN(value) || value === undefined || value === null) {
@@ -13,7 +16,7 @@ function rowLabel(value, unit = '') {
   return `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}${unit}`
 }
 
-function InfoPanel({ asteroid }) {
+function InfoPanel({ asteroid, currentIndex, totalCount, onPrev, onNext }) {
   return (
     <Fade in={Boolean(asteroid)} timeout={300}>
       <Paper
@@ -42,6 +45,10 @@ function InfoPanel({ asteroid }) {
               fontSize: '1.125rem',
               fontWeight: 600,
               letterSpacing: 0.4,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
             }}
           >
             {asteroid?.name || 'Select asteroid'}
@@ -76,6 +83,37 @@ function InfoPanel({ asteroid }) {
           >
             Close Approach: {asteroid?.closeApproachDate || 'N/A'}
           </Typography>
+        </Box>
+
+        <Divider sx={{ my: 1.5, borderColor: 'rgba(144, 166, 214, 0.35)' }} />
+
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            pointerEvents: 'auto',
+          }}
+        >
+          <IconButton
+            size="small"
+            onClick={onPrev}
+            disabled={totalCount === 0}
+            sx={{ color: '#8bb8ff' }}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+          <Typography sx={{ m: 0, fontSize: '0.75rem', color: 'rgba(203,213,225,0.8)' }}>
+            {totalCount > 0 ? `${currentIndex + 1} / ${totalCount}` : '—'}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={onNext}
+            disabled={totalCount === 0}
+            sx={{ color: '#8bb8ff' }}
+          >
+            <ChevronRightIcon />
+          </IconButton>
         </Box>
       </Paper>
     </Fade>
