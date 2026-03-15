@@ -35,18 +35,21 @@ function SearchFilter({
   onHazardFilterChange,
   sizeFilter,
   onSizeFilterChange,
+  inline = false,
 }) {
   return (
     <Box
       sx={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: inline ? 'row' : 'column',
+        flexWrap: inline ? 'wrap' : 'nowrap',
+        alignItems: inline ? 'center' : 'stretch',
         gap: 1.5,
-        width: 220,
-        p: 1.5,
-        borderRadius: 3,
-        border: '1px solid rgba(255,255,255,0.12)',
-        background: 'rgba(7, 16, 35, 0.92)',
+        width: inline ? '100%' : 220,
+        p: inline ? 0 : 1.5,
+        borderRadius: inline ? 0 : 3,
+        border: inline ? 'none' : '1px solid rgba(255,255,255,0.12)',
+        background: inline ? 'transparent' : 'rgba(7, 16, 35, 0.92)',
       }}
     >
       <TextField
@@ -54,6 +57,16 @@ function SearchFilter({
         placeholder="Search asteroids…"
         value={searchText}
         onChange={(e) => onSearchChange(e.target.value)}
+        sx={{
+          width: inline ? { xs: '100%', sm: 240 } : '100%',
+          '& .MuiOutlinedInput-root': {
+            color: '#e0e7ff',
+            fontSize: '0.8rem',
+            '& fieldset': { borderColor: 'rgba(255,255,255,0.18)' },
+            '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.35)' },
+            '&.Mui-focused fieldset': { borderColor: '#65F9FF' },
+          },
+        }}
         slotProps={{
           input: {
             startAdornment: (
@@ -63,18 +76,9 @@ function SearchFilter({
             ),
           },
         }}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            color: '#e0e7ff',
-            fontSize: '0.8rem',
-            '& fieldset': { borderColor: 'rgba(255,255,255,0.18)' },
-            '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.35)' },
-            '&.Mui-focused fieldset': { borderColor: '#65F9FF' },
-          },
-        }}
       />
 
-      <FormControl size="small">
+      <FormControl size="small" sx={{ minWidth: inline ? 150 : 0 }}>
         <InputLabel sx={labelSx}>Hazard Level</InputLabel>
         <Select
           value={hazardFilter}
@@ -88,7 +92,7 @@ function SearchFilter({
         </Select>
       </FormControl>
 
-      <FormControl size="small">
+      <FormControl size="small" sx={{ minWidth: inline ? 130 : 0 }}>
         <InputLabel sx={labelSx}>Size</InputLabel>
         <Select
           value={sizeFilter}

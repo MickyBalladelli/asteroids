@@ -4,6 +4,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TimeSlider from './TimeSlider'
+import SearchFilter from './SearchFilter'
 
 function TopBar({
   timePreset,
@@ -13,23 +14,29 @@ function TopBar({
   asteroidCount,
   hazardousCount,
   loading,
+  searchText,
+  onSearchChange,
+  hazardFilter,
+  onHazardFilterChange,
+  sizeFilter,
+  onSizeFilterChange,
 }) {
   return (
     <Box
       sx={{
         pointerEvents: 'auto',
         position: 'absolute',
-        left: '50%',
-        top: 16,
+        left: 0,
+        top: 0,
         zIndex: 20,
-        width: 'min(98%, 1100px)',
-        transform: 'translateX(-50%)',
-        borderRadius: 4,
-        border: '1px solid rgba(255,255,255,0.15)',
+        width: '100%',
+        transform: 'none',
+        borderRadius: 0,
+        borderBottom: '1px solid rgba(255,255,255,0.15)',
         background: 'rgba(7, 16, 35, 0.92)',
-        px: 2,
+        px: { xs: 1.5, md: 2.5 },
         py: 1.5,
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.35)',
         color: '#f1f5f9',
       }}
     >
@@ -102,6 +109,18 @@ function TopBar({
 
           {loading && <CircularProgress size={22} color="info" />}
         </Box>
+      </Box>
+
+      <Box sx={{ mt: 1.25 }}>
+        <SearchFilter
+          inline
+          searchText={searchText}
+          onSearchChange={onSearchChange}
+          hazardFilter={hazardFilter}
+          onHazardFilterChange={onHazardFilterChange}
+          sizeFilter={sizeFilter}
+          onSizeFilterChange={onSizeFilterChange}
+        />
       </Box>
     </Box>
   )

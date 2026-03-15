@@ -8,7 +8,6 @@ import AsteroidField from '../components/AsteroidField'
 import Radar from '../components/Radar'
 import TopBar from '../components/TopBar'
 import InfoPanel from '../components/InfoPanel'
-import SearchFilter from '../components/SearchFilter'
 import useAsteroids from '../hooks/useAsteroids'
 
 const PRESET_TO_DAYS = [0, 7, 30]
@@ -125,26 +124,13 @@ function Home() {
         asteroidCount={filteredAsteroids.length}
         hazardousCount={stats.hazardous}
         loading={loading}
+        searchText={searchText}
+        onSearchChange={setSearchText}
+        hazardFilter={hazardFilter}
+        onHazardFilterChange={setHazardFilter}
+        sizeFilter={sizeFilter}
+        onSizeFilterChange={setSizeFilter}
       />
-
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 100,
-          left: 16,
-          zIndex: 20,
-          pointerEvents: 'auto',
-        }}
-      >
-        <SearchFilter
-          searchText={searchText}
-          onSearchChange={setSearchText}
-          hazardFilter={hazardFilter}
-          onHazardFilterChange={setHazardFilter}
-          sizeFilter={sizeFilter}
-          onSizeFilterChange={setSizeFilter}
-        />
-      </Box>
 
       <Box
         sx={{
