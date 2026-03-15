@@ -9,6 +9,7 @@ import Radar from '../components/Radar'
 import TopBar from '../components/TopBar'
 import InfoPanel from '../components/InfoPanel'
 import CameraController from '../components/CameraController'
+import DistanceLine from '../components/DistanceLine'
 import useAsteroids from '../hooks/useAsteroids'
 
 const PRESET_TO_DAYS = [0, 7, 30]
@@ -208,6 +209,10 @@ function Home() {
           onSelect={setSelectedAsteroid}
           selectedId={selectedAsteroid?.id || null}
           positionsRef={positionsRef}
+        />
+        <DistanceLine
+          positionsRef={positionsRef}
+          selectedId={selectedAsteroid?.id || null}
         />
 
         <CameraController
