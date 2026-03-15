@@ -8,12 +8,16 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
 - Rotating textured Earth with atmospheric glow
 - Animated asteroid motion around Earth
 - Hazard-aware coloring and glow intensity
+- Threat scoring (0-100) based on miss distance, size, speed, and approach date
 - Orbit trajectories and fading asteroid trails
 - Hover labels and click-to-inspect asteroid panel
 - Asteroid search and filter by name, hazard level, and size
 - Previous / next navigation between asteroids with selection highlight
 - Time range slider: today, next 7 days, next 30 days
-- Radar hazard mode with animated ring scans
+- Radar hazard mode with threat-driven pulse speed and color
+- Earth-centered hazard zone bands (safe/caution/high)
+- Radar presets: Visual, Risk Weighted, Imminent Only
+- Top-3 ranked hazard panel with quick-select cards
 - Cinematic deep-space background
 
 ## Architecture
@@ -23,7 +27,13 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
 - `src/utils/api.js`
   - Uses Axios to call NASA's NEO feed endpoint with API key from environment variables.
 - `src/hooks/useAsteroids.js`
-  - Fetches by date window, normalizes the response, computes orbit metadata, and exposes loading/stats.
+  - Fetches by date window, normalizes the response, computes orbit metadata and threat score, and exposes loading/stats.
+
+### Risk + Threat Modeling
+
+- `src/utils/threatScore.js`
+  - Computes a weighted threat score (0-100) per asteroid.
+  - Exposes threat level labels and color mapping helpers.
 
 ### Math + Simulation
 
@@ -38,21 +48,44 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
 - `src/components/AsteroidField.jsx`
   - Maps over asteroid data to render orbit lines + asteroid bodies.
 - `src/components/Asteroid.jsx`
-  - Per-asteroid animation loop, selection highlight ring, and glow behavior.
+  - Per-asteroid animation loop, rocky body rendering, threat-aware glow, and selection outline.
 - `src/components/AsteroidTrail.jsx`
   - Recent-position history rendered as additive fading trail.
 - `src/components/Radar.jsx`
-  - Hazard mode ring pulses around Earth.
+  - Threat-driven radar pulses plus Earth-centered hazard zone bands.
 
 ### UI Layer
 
 - `src/components/TopBar.jsx`
-  - Displays title, time slider, radar toggle, counters, loading indicator.
+  - Displays title, time slider, radar toggle, radar mode presets, counters, loading indicator, and ranked hazard cards.
 - `src/components/InfoPanel.jsx`
-  - Displays selected asteroid details with smooth fade animation and previous/next navigation.
+  - Displays selected asteroid details with smooth fade animation, threat chip, and previous/next navigation.
 - `src/components/SearchFilter.jsx`
   - Search input and dropdowns to filter asteroids by name, hazard level, and size.
+- `src/components/ThreatPanel.jsx`
+  - Shows top 3 highest-threat asteroids with keyboard-accessible quick selection.
 - Material UI components and `sx` styling for a consistent UI layer.
+
+## Hazard Radar Modes
+
+- `Visual`
+  - Shows radar pulses and hazard zones for situational awareness.
+- `Risk Weighted`
+  - Highlights asteroids and orbits by threat score color intensity.
+- `Imminent Only`
+  - Focuses view on asteroids approaching within 7 days.
+
+## Threat Score Formula (High-Level)
+
+Threat score combines:
+
+- Proximity (miss distance)
+- Size (diameter)
+- Velocity
+- Urgency (days until approach)
+- Hazardous flag bonus
+
+The result is a normalized `0-100` score used by radar pulse behavior, orbit coloring, ranked hazard cards, and threat badges.
 
 ## Project Structure
 
@@ -65,6 +98,7 @@ src/
     AsteroidTrail.jsx
     AsteroidField.jsx
     Radar.jsx
+    ThreatPanel.jsx
     SearchFilter.jsx
     InfoPanel.jsx
     TimeSlider.jsx
@@ -76,6 +110,7 @@ src/
   utils/
     api.js
     orbitMath.js
+    threatScore.js
   App.jsx
   main.jsx
 ```

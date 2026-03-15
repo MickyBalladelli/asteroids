@@ -59,6 +59,7 @@ function Home() {
   const [timePreset, setTimePreset] = useState(1)
   const [atScale, setAtScale] = useState(true)
   const [hazardMode, setHazardMode] = useState(false)
+  const [radarMode, setRadarMode] = useState('visual')
   const [selectedAsteroid, setSelectedAsteroid] = useState(null)
   const [searchText, setSearchText] = useState('')
   const [hazardFilter, setHazardFilter] = useState('all')
@@ -92,6 +93,23 @@ function Home() {
 
     return result
   }, [asteroids, searchText, hazardFilter, sizeFilter])
+
+  const maxThreatScore = useMemo(() => {
+    if (filteredAsteroids.length === 0) return 0
+    return Math.max(...filteredAsteroids.map((a) => a.threatScore || 0))
+  }, [filteredAsteroids])
+
+  // In 'imminent' radar mode, only show asteroids approaching within 7 days
+  const displayedAsteroids = useMemo(() => {
+    if (!hazardMode || radarMode !== 'imminent') return filteredAsteroids
+    const now = new Date()
+    const cutoff = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    return filteredAsteroids.filter((a) => {
+      if (!a.closeApproachDate || a.closeApproachDate === 'Unknown') return false
+      const d = new Date(a.closeApproachDate)
+      return d <= cutoff
+    })
+  }, [filteredAsteroids, hazardMode, radarMode])
 
   const searchOptions = useMemo(
     () => [...new Set(asteroids.map((a) => a.name))].sort((a, b) => a.localeCompare(b)),
@@ -142,7 +160,9 @@ function Home() {
         onToggleAtScale={setAtScale}
         hazardMode={hazardMode}
         onToggleHazard={setHazardMode}
-        asteroidCount={filteredAsteroids.length}
+        radarMode={radarMode}
+        onRadarModeChange={setRadarMode}
+        asteroidCount={displayedAsteroids.length}
         hazardousCount={stats.hazardous}
         loading={loading}
         searchText={searchText}
@@ -153,6 +173,8 @@ function Home() {
         onHazardFilterChange={setHazardFilter}
         sizeFilter={sizeFilter}
         onSizeFilterChange={setSizeFilter}
+        asteroids={displayedAsteroids}
+        onSelectAsteroid={setSelectedAsteroid}
       />
 
       <Box
@@ -202,9 +224,9 @@ function Home() {
         <pointLight position={[-12, -4, -9]} intensity={0.22} color="#4e6cff" />
 
         <Earth />
-        <Radar enabled={hazardMode} />
+        <Radar enabled={hazardMode} maxThreatScore={maxThreatScore} />
         <AsteroidField
-          asteroids={filteredAsteroids}
+          asteroids={displayedAsteroids}
           hazardMode={hazardMode}
           onSelect={setSelectedAsteroid}
           selectedId={selectedAsteroid?.id || null}

@@ -2,6 +2,7 @@ import { memo, useCallback, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { EARTH_RADIUS_UNITS, pointOnOrbitTo } from '../utils/orbitMath'
+import { threatColor } from '../utils/threatScore'
 import AsteroidTrail from './AsteroidTrail'
 
 // Seed-based pseudo-random so each asteroid looks unique but stable
@@ -117,7 +118,9 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) 
         ? asteroid.hazardous
           ? 0.7 + glowBoost
           : 0.08
-        : 0.2 + glowBoost * 0.35
+        : asteroid.hazardous
+          ? 0.35 + glowBoost * 0.5
+          : 0.2 + glowBoost * 0.35
       const highlightedIntensity = isSelected ? intensity + 0.28 : intensity
       const targetScale = size * (1 + scaleBoost * 0.5) * (isSelected ? 1.16 : 1)
 
@@ -184,7 +187,7 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) 
         raycast={() => null}
       >
         <meshBasicMaterial
-          color="#65F9FF"
+          color={isSelected ? '#65F9FF' : threatColor(asteroid.threatScore || 0)}
           transparent
           opacity={0.18}
           wireframe

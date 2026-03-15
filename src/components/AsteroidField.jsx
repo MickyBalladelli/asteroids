@@ -12,6 +12,7 @@ function AsteroidField({ asteroids, hazardMode, onSelect, selectedId, positionsR
             hazardMode={hazardMode}
             hazardous={asteroid.hazardous}
             isSelected={asteroid.id === selectedId}
+            threatScore={asteroid.threatScore}
           />
           <Asteroid
             asteroid={asteroid}

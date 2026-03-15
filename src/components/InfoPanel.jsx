@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { threatColor, threatLabel } from '../utils/threatScore'
 
 function rowLabel(value, unit = '') {
   if (Number.isNaN(value) || value === undefined || value === null) {
@@ -58,6 +59,19 @@ function InfoPanel({ asteroid, currentIndex, totalCount, onPrev, onNext }) {
             label={asteroid?.hazardous ? 'Hazardous' : 'Safe'}
             color={asteroid?.hazardous ? 'error' : 'success'}
           />
+          {asteroid?.threatScore != null && (
+            <Chip
+              size="small"
+              label={`${threatLabel(asteroid.threatScore)} (${asteroid.threatScore})`}
+              sx={{
+                bgcolor: `${threatColor(asteroid.threatScore)}22`,
+                color: threatColor(asteroid.threatScore),
+                border: `1px solid ${threatColor(asteroid.threatScore)}55`,
+                fontWeight: 600,
+                fontSize: '0.68rem',
+              }}
+            />
+          )}
         </Box>
 
         <Divider sx={{ my: 1.5, borderColor: 'rgba(144, 166, 214, 0.35)' }} />

@@ -3,8 +3,11 @@ import CircularProgress from '@mui/material/CircularProgress'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
 import TimeSlider from './TimeSlider'
 import SearchFilter from './SearchFilter'
+import ThreatPanel from './ThreatPanel'
 
 function TopBar({
   timePreset,
@@ -13,6 +16,8 @@ function TopBar({
   onToggleAtScale,
   hazardMode,
   onToggleHazard,
+  radarMode,
+  onRadarModeChange,
   asteroidCount,
   hazardousCount,
   loading,
@@ -24,6 +29,8 @@ function TopBar({
   onHazardFilterChange,
   sizeFilter,
   onSizeFilterChange,
+  asteroids,
+  onSelectAsteroid,
 }) {
   return (
     <Box
@@ -94,6 +101,31 @@ function TopBar({
             sx={{ m: 0, marginLeft: 10 }}
           />
 
+          {hazardMode && (
+            <Select
+              size="small"
+              value={radarMode}
+              onChange={(e) => onRadarModeChange(e.target.value)}
+              sx={{
+                color: '#e0e8f5',
+                fontSize: '0.75rem',
+                height: 32,
+                '.MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255,255,255,0.2)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255,255,255,0.4)',
+                },
+                '.MuiSelect-icon': { color: 'rgba(255,255,255,0.5)' },
+              }}
+              aria-label="Radar mode"
+            >
+              <MenuItem value="visual">Visual</MenuItem>
+              <MenuItem value="risk">Risk Weighted</MenuItem>
+              <MenuItem value="imminent">Imminent Only</MenuItem>
+            </Select>
+          )}
+
           <FormControlLabel
             control={
               <Switch
@@ -126,7 +158,7 @@ function TopBar({
         </Box>
       </Box>
 
-      <Box sx={{ mt: 1.25 }}>
+      <Box sx={{ mt: 1.25, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
         <SearchFilter
           inline
           searchText={searchText}
@@ -138,6 +170,9 @@ function TopBar({
           sizeFilter={sizeFilter}
           onSizeFilterChange={onSizeFilterChange}
         />
+        {hazardMode && asteroids && asteroids.length > 0 && (
+          <ThreatPanel asteroids={asteroids} onSelect={onSelectAsteroid} />
+        )}
       </Box>
     </Box>
   )

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchAsteroidsByRange } from '../utils/api'
 import { buildOrbitFromAsteroid } from '../utils/orbitMath'
+import { computeThreatScore } from '../utils/threatScore'
 
 function normalizeAsteroid(item, atScale) {
   const approach = item.close_approach_data?.[0] || {}
@@ -21,6 +22,7 @@ function normalizeAsteroid(item, atScale) {
 
   return {
     ...asteroid,
+    threatScore: computeThreatScore(asteroid),
     orbit: buildOrbitFromAsteroid(asteroid, atScale),
   }
 }
