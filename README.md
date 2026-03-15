@@ -75,6 +75,24 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
 - `Imminent Only`
   - Focuses view on asteroids approaching within 7 days.
 
+## How to Use Hazard Radar
+
+1. Turn on `Hazard Radar` in the top header.
+2. Choose a radar preset:
+  - `Visual`: ambient situational scan with pulse rings and hazard zones.
+  - `Risk Weighted`: emphasizes objects and orbits by threat score.
+  - `Imminent Only`: narrows focus to near-term approaches (next 7 days).
+3. Watch the pulse behavior around Earth:
+  - Faster pulse speed indicates higher active threat in the current dataset.
+  - Pulse color shifts from green/yellow to orange/red as risk increases.
+4. Use the top `Threat` cards (Top 3) to jump directly to high-risk asteroids.
+5. Click an asteroid (or use search/autocomplete) to inspect details:
+  - Name, diameter, velocity, miss distance, close-approach date.
+  - Hazard badge and threat label/score in the details panel.
+6. Keep `At Scale` on for physically scaled distance context, or off for easier visual comparison.
+
+Tip: For demos, start in `Risk Weighted`, select a top threat from the header cards, then switch to `Imminent Only` to show decision-focused filtering.
+
 ## Threat Score Formula (High-Level)
 
 Threat score combines:
@@ -155,14 +173,24 @@ npm run dev
 - `docs/screenshots/hazard-mode.png`
 - `docs/screenshots/info-panel.png`
 
+Recommended capture set:
+
+- `docs/screenshots/radar-visual-mode.png` (Visual preset with zone bands)
+- `docs/screenshots/radar-risk-weighted.png` (threat-colored emphasis)
+- `docs/screenshots/radar-imminent-only.png` (filtered near-term threats)
+- `docs/screenshots/top-threat-cards.png` (header quick-select panel)
+- `docs/screenshots/selected-threat-panel.png` (info panel with threat chip)
+
 ## GIF Demo Suggestion
 
 Record a short walkthrough showing:
 
 - Slider switching from today to 30-day mode
-- Hazard radar mode toggle on/off
-- Hover labels and asteroid click details
-- Camera zoom + orbital motion in bloom lighting
+- Hazard radar toggle, then cycling `Visual` → `Risk Weighted` → `Imminent Only`
+- Top threat card selection and automatic camera follow
+- Distance label near selected asteroid and details panel threat chip
+- Zoom in/out while following selected asteroid (center lock behavior)
+- Search autocomplete selecting a specific asteroid by name
 
 Recommended tools: Screen Studio, Kap, or OBS.
 
