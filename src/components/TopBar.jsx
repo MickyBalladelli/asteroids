@@ -9,6 +9,8 @@ import SearchFilter from './SearchFilter'
 function TopBar({
   timePreset,
   onTimePresetChange,
+  atScale,
+  onToggleAtScale,
   hazardMode,
   onToggleHazard,
   asteroidCount,
@@ -89,6 +91,17 @@ function TopBar({
               />
             }
             label="Hazard Radar"
+            sx={{ m: 0 }}
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={atScale}
+                onChange={(event) => onToggleAtScale(event.target.checked)}
+              />
+            }
+            label="At Scale"
             sx={{ m: 0 }}
           />
 

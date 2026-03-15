@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchAsteroidsByRange } from '../utils/api'
 import { buildOrbitFromAsteroid } from '../utils/orbitMath'
 
-function normalizeAsteroid(item) {
+function normalizeAsteroid(item, atScale) {
   const approach = item.close_approach_data?.[0] || {}
   const diameterMin =
     item.estimated_diameter?.kilometers?.estimated_diameter_min || 0
@@ -21,11 +21,11 @@ function normalizeAsteroid(item) {
 
   return {
     ...asteroid,
-    orbit: buildOrbitFromAsteroid(asteroid),
+    orbit: buildOrbitFromAsteroid(asteroid, atScale),
   }
 }
 
-export default function useAsteroids(daysAhead) {
+export default function useAsteroids(daysAhead, atScale = true) {
   const [asteroids, setAsteroids] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -38,17 +38,22 @@ export default function useAsteroids(daysAhead) {
       const grouped = response.near_earth_objects || {}
       const normalized = Object.values(grouped)
         .flat()
-        .map(normalizeAsteroid)
-        .slice(0, 100)
+        .map((item) => normalizeAsteroid(item, atScale))
+        .sort((a, b) => a.missDistanceKm - b.missDistanceKm)
 
-      setAsteroids(normalized)
+      const nearby = normalized.filter((asteroid) => asteroid.missDistanceKm <= 1200000)
+      const prioritized = atScale
+        ? (nearby.length >= 24 ? nearby : normalized).slice(0, 100)
+        : normalized.slice(0, 100)
+
+      setAsteroids(prioritized)
     } catch (fetchError) {
       setError(fetchError.message || 'Unable to fetch asteroid data')
       setAsteroids([])
     } finally {
       setLoading(false)
     }
-  }, [daysAhead])
+  }, [atScale, daysAhead])
 
   useEffect(() => {
     loadAsteroids()

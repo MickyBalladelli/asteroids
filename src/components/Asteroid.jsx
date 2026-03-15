@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { pointOnOrbitTo } from '../utils/orbitMath'
+import { EARTH_RADIUS_UNITS, pointOnOrbitTo } from '../utils/orbitMath'
 import AsteroidTrail from './AsteroidTrail'
 
 function Asteroid({ asteroid, hazardMode, onSelect, isSelected }) {
@@ -32,15 +32,16 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected }) {
 
     if (meshRef.current) {
       const dist = pos.length()
+      const earthRadii = dist / EARTH_RADIUS_UNITS
       const scaleBoost = THREE.MathUtils.clamp(
-        (1 / (dist + 0.2)) * 4 * asteroid.orbit.approachStrength,
-        0.35,
-        2.3,
+        (1 / (earthRadii + 1)) * 36 * asteroid.orbit.approachStrength,
+        0.2,
+        1.85,
       )
       const glowBoost = THREE.MathUtils.clamp(
-        (1 / (dist + 0.2)) * 2.8,
-        0.2,
-        1.9,
+        (1 / (earthRadii + 1)) * 22,
+        0.08,
+        1.5,
       )
       const intensity = hazardMode
         ? asteroid.hazardous

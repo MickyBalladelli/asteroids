@@ -48,13 +48,14 @@ function SpaceBackdrop() {
 
   return (
     <mesh material={material} raycast={() => null}>
-      <sphereGeometry args={[90, 32, 32]} />
+      <sphereGeometry args={[12000, 32, 32]} />
     </mesh>
   )
 }
 
 function Home() {
   const [timePreset, setTimePreset] = useState(1)
+  const [atScale, setAtScale] = useState(true)
   const [hazardMode, setHazardMode] = useState(false)
   const [selectedAsteroid, setSelectedAsteroid] = useState(null)
   const [searchText, setSearchText] = useState('')
@@ -62,7 +63,7 @@ function Home() {
   const [sizeFilter, setSizeFilter] = useState('all')
 
   const daysAhead = PRESET_TO_DAYS[timePreset]
-  const { asteroids, loading, stats } = useAsteroids(daysAhead)
+  const { asteroids, loading, stats } = useAsteroids(daysAhead, atScale)
 
   const filteredAsteroids = useMemo(() => {
     let result = asteroids
@@ -134,6 +135,8 @@ function Home() {
       <TopBar
         timePreset={timePreset}
         onTimePresetChange={setTimePreset}
+        atScale={atScale}
+        onToggleAtScale={setAtScale}
         hazardMode={hazardMode}
         onToggleHazard={setHazardMode}
         asteroidCount={filteredAsteroids.length}
@@ -170,7 +173,7 @@ function Home() {
       </Box>
 
       <Canvas
-        camera={{ position: [0, 5.5, 10], fov: 46 }}
+        camera={{ position: [0, 36, 110], fov: 48, near: 0.1, far: 20000 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
       >
@@ -178,8 +181,8 @@ function Home() {
 
         <SpaceBackdrop />
         <Stars
-          radius={100}
-          depth={45}
+          radius={5000}
+          depth={4000}
           count={2000}
           factor={4}
           saturation={0}
@@ -207,8 +210,8 @@ function Home() {
         <OrbitControls
           enablePan
           enableZoom
-          minDistance={3.8}
-          maxDistance={28}
+          minDistance={4}
+          maxDistance={1400}
           maxPolarAngle={Math.PI - 0.12}
           minPolarAngle={0.2}
         />
