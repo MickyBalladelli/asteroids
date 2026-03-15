@@ -2,6 +2,9 @@
 
 ![ Asteroids Tracker ](src/docs/tracker.png) 
 
+ 
+[Demo at Vercel](https://asteroids-eight-opal.vercel.app/)
+
 Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Near-Earth Objects (NEOs) from NASA's public APIs. It renders Earth in the center of a cinematic 3D scene and animates asteroids in orbit trajectories, with hazard-focused radar mode and real-time asteroid details.
 
 ## Feature Overview
