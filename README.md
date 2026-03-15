@@ -1,5 +1,7 @@
 # Asteroid Tracker
 
+![ Asteroids Tracker ](src/docs/tracker.png) 
+
 Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Near-Earth Objects (NEOs) from NASA's public APIs. It renders Earth in the center of a cinematic 3D scene and animates asteroids in orbit trajectories, with hazard-focused radar mode and real-time asteroid details.
 
 ## Feature Overview
@@ -166,20 +168,6 @@ npm run dev
 - API base: `https://api.nasa.gov/`
 - Endpoint used: NEO feed (`/neo/rest/v1/feed`)
 - Date range must stay within NASA NEO feed limits.
-
-![ Asteroids Tracker ](src/docs/tracker.png) 
-## GIF Demo Suggestion
-
-Record a short walkthrough showing:
-
-- Slider switching from today to 30-day mode
-- Hazard radar toggle, then cycling `Visual` → `Risk Weighted` → `Imminent Only`
-- Top threat card selection and automatic camera follow
-- Distance label near selected asteroid and details panel threat chip
-- Zoom in/out while following selected asteroid (center lock behavior)
-- Search autocomplete selecting a specific asteroid by name
-
-Recommended tools: Screen Studio, Kap, or OBS.
 
 ## Future Features
 
