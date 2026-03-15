@@ -48,7 +48,8 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected }) {
           ? 0.7 + glowBoost
           : 0.08
         : 0.2 + glowBoost * 0.35
-      const targetScale = size * (1 + scaleBoost * 0.5)
+      const highlightedIntensity = isSelected ? intensity + 0.28 : intensity
+      const targetScale = size * (1 + scaleBoost * 0.5) * (isSelected ? 1.16 : 1)
 
       smoothScaleRef.current = THREE.MathUtils.lerp(
         smoothScaleRef.current,
@@ -57,7 +58,7 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected }) {
       )
       smoothEmissiveRef.current = THREE.MathUtils.lerp(
         smoothEmissiveRef.current,
-        intensity,
+        highlightedIntensity,
         0.16,
       )
 

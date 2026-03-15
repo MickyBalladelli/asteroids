@@ -60,13 +60,19 @@ function SearchFilter({
         options={searchOptions}
         value={null}
         inputValue={searchText}
-        onInputChange={(_, value) => onSearchChange(value)}
+        onInputChange={(_, value, reason) => {
+          // Ignore internal reset events so picking an option does not lock filtering to one name.
+          if (reason === 'reset') return
+          onSearchChange(value)
+        }}
         onChange={(_, value) => {
-          const nextValue = value || ''
-          onSearchChange(nextValue)
-          if (nextValue && onSearchSelect) {
-            onSearchSelect(nextValue)
+          if (value && onSearchSelect) {
+            onSearchSelect(value)
+            onSearchChange('')
+            return
           }
+
+          onSearchChange(value || '')
         }}
         filterOptions={(options, state) => {
           const term = state.inputValue.trim().toLowerCase()
