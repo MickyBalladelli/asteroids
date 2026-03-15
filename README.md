@@ -107,33 +107,6 @@ Threat score combines:
 
 The result is a normalized `0-100` score used by radar pulse behavior, orbit coloring, ranked hazard cards, and threat badges.
 
-## Project Structure
-
-```text
-src/
-  components/
-    Earth.jsx
-    Asteroid.jsx
-    AsteroidOrbit.jsx
-    AsteroidTrail.jsx
-    AsteroidField.jsx
-    Radar.jsx
-    ThreatPanel.jsx
-    SearchFilter.jsx
-    InfoPanel.jsx
-    TimeSlider.jsx
-    TopBar.jsx
-  hooks/
-    useAsteroids.js
-  pages/
-    Home.jsx
-  utils/
-    api.js
-    orbitMath.js
-    threatScore.js
-  App.jsx
-  main.jsx
-```
 
 ## Installation
 
