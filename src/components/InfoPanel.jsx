@@ -23,7 +23,7 @@ function InfoPanel({ asteroid, currentIndex, totalCount, onPrev, onNext }) {
       <Paper
         elevation={6}
         sx={{
-          width: 320,
+          width: 420,
           p: 2,
           borderRadius: 3,
           background:
@@ -56,13 +56,13 @@ function InfoPanel({ asteroid, currentIndex, totalCount, onPrev, onNext }) {
           </Typography>
           <Chip
             size="small"
-            label={asteroid?.hazardous ? 'Hazardous' : 'Safe'}
+            label={asteroid?.hazardous ? 'NASA: Hazardous' : 'NASA: Safe'}
             color={asteroid?.hazardous ? 'error' : 'success'}
           />
           {asteroid?.threatScore != null && (
             <Chip
               size="small"
-              label={`${threatLabel(asteroid.threatScore)} (${asteroid.threatScore})`}
+              label={`Model Risk: ${threatLabel(asteroid.threatScore)} (${asteroid.threatScore})`}
               sx={{
                 bgcolor: `${threatColor(asteroid.threatScore)}22`,
                 color: threatColor(asteroid.threatScore),
