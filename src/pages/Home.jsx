@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Stars } from '@react-three/drei'
+import { Stars } from '@react-three/drei'
 import Box from '@mui/material/Box'
 import * as THREE from 'three'
 import Earth from '../components/Earth'
@@ -8,6 +8,7 @@ import AsteroidField from '../components/AsteroidField'
 import Radar from '../components/Radar'
 import TopBar from '../components/TopBar'
 import InfoPanel from '../components/InfoPanel'
+import CameraController from '../components/CameraController'
 import useAsteroids from '../hooks/useAsteroids'
 
 const PRESET_TO_DAYS = [0, 7, 30]
@@ -62,6 +63,7 @@ function Home() {
   const [hazardFilter, setHazardFilter] = useState('all')
   const [sizeFilter, setSizeFilter] = useState('all')
 
+  const positionsRef = useRef({})
   const daysAhead = PRESET_TO_DAYS[timePreset]
   const { asteroids, loading, stats } = useAsteroids(daysAhead, atScale)
 
@@ -205,9 +207,12 @@ function Home() {
           hazardMode={hazardMode}
           onSelect={setSelectedAsteroid}
           selectedId={selectedAsteroid?.id || null}
+          positionsRef={positionsRef}
         />
 
-        <OrbitControls
+        <CameraController
+          selectedAsteroid={selectedAsteroid}
+          positionsRef={positionsRef}
           enablePan
           enableZoom
           minDistance={4}

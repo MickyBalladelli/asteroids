@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { EARTH_RADIUS_UNITS, pointOnOrbitTo } from '../utils/orbitMath'
 import AsteroidTrail from './AsteroidTrail'
 
-function Asteroid({ asteroid, hazardMode, onSelect, isSelected }) {
+function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) {
   const meshRef = useRef()
   const ringRef = useRef()
   const positionRef = useRef(new THREE.Vector3())
@@ -29,6 +29,8 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected }) {
     tRef.current = (tRef.current + delta * asteroid.orbit.angularSpeed) % 1
     pointOnOrbitTo(asteroid.orbit, tRef.current, positionRef.current)
     const pos = positionRef.current
+
+    if (positionsRef) positionsRef.current[asteroid.id] = pos
 
     if (meshRef.current) {
       const dist = pos.length()
