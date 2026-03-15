@@ -4,22 +4,84 @@ import * as THREE from 'three'
 import { EARTH_RADIUS_UNITS, pointOnOrbitTo } from '../utils/orbitMath'
 import AsteroidTrail from './AsteroidTrail'
 
+// Seed-based pseudo-random so each asteroid looks unique but stable
+function seededRandom(seed) {
+  let s = seed
+  return () => {
+    s = (s * 16807 + 0) % 2147483647
+    return (s - 1) / 2147483646
+  }
+}
+
+function makeRockyGeometry(seed) {
+  // Start from an icosahedron, displace vertices for a rough shape
+  const detail = 1
+  const geo = new THREE.IcosahedronGeometry(1, detail)
+  const pos = geo.attributes.position
+  const rng = seededRandom(seed)
+
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i)
+    const y = pos.getY(i)
+    const z = pos.getZ(i)
+    const len = Math.sqrt(x * x + y * y + z * z)
+    // Random displacement between 0.7 and 1.0 of original radius
+    const displacement = 0.7 + rng() * 0.3
+    pos.setXYZ(i, (x / len) * displacement, (y / len) * displacement, (z / len) * displacement)
+  }
+
+  geo.computeVertexNormals()
+  return geo
+}
+
 function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) {
   const meshRef = useRef()
-  const ringRef = useRef()
+  const glowRef = useRef()
   const positionRef = useRef(new THREE.Vector3())
   const tRef = useRef(Math.random())
   const smoothScaleRef = useRef(0.1)
   const smoothEmissiveRef = useRef(0.25)
 
-  const baseColor = asteroid.hazardous ? '#ff5c5c' : '#f4f7ff'
-  const radarColor = asteroid.hazardous ? '#ff2222' : '#44506e'
-  const asteroidColor = asteroid.hazardous
-    ? '#ff5c5c'
-    : hazardMode
-      ? radarColor
-      : baseColor
+  // Stable seed from asteroid id
+  const idSeed = useMemo(() => {
+    let h = 0
+    const s = asteroid.id
+    for (let i = 0; i < s.length; i++) {
+      h = (h << 5) - h + s.charCodeAt(i)
+      h |= 0
+    }
+    return Math.abs(h)
+  }, [asteroid.id])
+
+  const rockyGeo = useMemo(() => makeRockyGeometry(idSeed), [idSeed])
+
+  // Each asteroid gets a slightly different grey/brown rocky tint
+  const rockyColor = useMemo(() => {
+    const rng = seededRandom(idSeed + 99)
+    if (asteroid.hazardous) {
+      const r = 0.55 + rng() * 0.25
+      const g = 0.15 + rng() * 0.1
+      const b = 0.1 + rng() * 0.08
+      return new THREE.Color(r, g, b)
+    }
+    const base = 0.28 + rng() * 0.22
+    const r = base + (rng() - 0.5) * 0.08
+    const g = base + (rng() - 0.5) * 0.05
+    const b = base + (rng() - 0.5) * 0.03
+    return new THREE.Color(r, g, b)
+  }, [idSeed, asteroid.hazardous])
+
   const emissiveColor = asteroid.hazardous ? '#ff1515' : '#526cff'
+
+  // Unique slow tumble rotation axis per asteroid
+  const rotAxis = useMemo(() => {
+    const rng = seededRandom(idSeed + 7)
+    return new THREE.Vector3(rng() - 0.5, rng() - 0.5, rng() - 0.5).normalize()
+  }, [idSeed])
+  const rotSpeed = useMemo(() => {
+    const rng = seededRandom(idSeed + 13)
+    return 0.15 + rng() * 0.4
+  }, [idSeed])
 
   const size = useMemo(
     () =>
@@ -73,12 +135,19 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) 
       meshRef.current.position.copy(pos)
       meshRef.current.scale.setScalar(smoothScaleRef.current)
       meshRef.current.material.emissiveIntensity = smoothEmissiveRef.current
+
+      // Slow tumble rotation
+      meshRef.current.rotateOnAxis(rotAxis, rotSpeed * delta)
     }
 
-    if (ringRef.current) {
-      ringRef.current.position.copy(pos)
-      ringRef.current.scale.setScalar(smoothScaleRef.current * 2.2)
-      ringRef.current.visible = isSelected
+    // Selection glow: slightly larger wireframe shell
+    if (glowRef.current) {
+      glowRef.current.position.copy(pos)
+      glowRef.current.scale.setScalar(smoothScaleRef.current * 1.35)
+      glowRef.current.visible = isSelected
+      if (isSelected) {
+        glowRef.current.rotation.copy(meshRef.current.rotation)
+      }
     }
   })
 
@@ -94,32 +163,32 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) 
     <group>
       <mesh
         ref={meshRef}
+        geometry={rockyGeo}
         onClick={handleClick}
       >
-        <sphereGeometry args={[1, 10, 10]} />
         <meshStandardMaterial
-          color={asteroidColor}
-          roughness={0.35}
-          metalness={0.12}
+          color={rockyColor}
+          roughness={0.85}
+          metalness={0.15}
           emissive={emissiveColor}
           emissiveIntensity={0.25}
+          flatShading
         />
       </mesh>
 
+      {/* Selection glow outline */}
       <mesh
-        ref={ringRef}
+        ref={glowRef}
+        geometry={rockyGeo}
         visible={false}
-        rotation-x={-Math.PI / 2}
         raycast={() => null}
       >
-        <ringGeometry args={[0.8, 1, 32]} />
         <meshBasicMaterial
           color="#65F9FF"
           transparent
-          opacity={0.6}
+          opacity={0.18}
+          wireframe
           depthTest={false}
-          depthWrite={false}
-          side={THREE.DoubleSide}
         />
       </mesh>
 
