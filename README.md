@@ -48,7 +48,7 @@ Asteroid Tracker is an interactive React + ThreeJS experience that visualizes Ne
   - Displays title, time slider, radar toggle, counters, loading indicator.
 - `src/components/InfoPanel.jsx`
   - Displays selected asteroid details with smooth fade animation.
-- Tailwind CSS for utility styling + Material UI controls for polished interaction widgets.
+- Material UI components and `sx` styling for a consistent UI layer.
 
 ## Project Structure
 

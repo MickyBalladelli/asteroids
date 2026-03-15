@@ -1,59 +1,85 @@
-import { Text } from '@react-three/drei';
-import { memo, useMemo, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
-import { distanceScaling, pointOnOrbit } from '../utils/orbitMath';
-import AsteroidTrail from './AsteroidTrail';
+import { memo, useCallback, useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
+import { pointOnOrbitTo } from '../utils/orbitMath'
+import AsteroidTrail from './AsteroidTrail'
 
 function Asteroid({ asteroid, hazardMode, onSelect }) {
-  const meshRef = useRef();
-  const [hovered, setHovered] = useState(false);
-  const [trailPosition, setTrailPosition] = useState(null);
-  const tRef = useRef(Math.random());
+  const meshRef = useRef()
+  const positionRef = useRef(new THREE.Vector3())
+  const tRef = useRef(Math.random())
+  const smoothScaleRef = useRef(0.1)
+  const smoothEmissiveRef = useRef(0.25)
 
-  const baseColor = asteroid.hazardous ? '#ff5c5c' : '#f4f7ff';
-  const radarColor = asteroid.hazardous ? '#ff2222' : '#44506e';
+  const baseColor = asteroid.hazardous ? '#ff5c5c' : '#f4f7ff'
+  const radarColor = asteroid.hazardous ? '#ff2222' : '#44506e'
 
   const size = useMemo(
-    () => THREE.MathUtils.clamp(0.03 + Math.sqrt(asteroid.diameterKm) * 0.09, 0.035, 0.19),
-    [asteroid.diameterKm]
-  );
+    () =>
+      THREE.MathUtils.clamp(
+        0.03 + Math.sqrt(asteroid.diameterKm) * 0.09,
+        0.035,
+        0.19,
+      ),
+    [asteroid.diameterKm],
+  )
 
   useFrame((_, delta) => {
-    tRef.current = (tRef.current + delta * asteroid.orbit.angularSpeed) % 1;
-    const pos = pointOnOrbit(asteroid.orbit, tRef.current);
+    tRef.current = (tRef.current + delta * asteroid.orbit.angularSpeed) % 1
+    pointOnOrbitTo(asteroid.orbit, tRef.current, positionRef.current)
+    const pos = positionRef.current
 
     if (meshRef.current) {
-      const { scaleBoost, glowBoost } = distanceScaling(pos, asteroid.orbit.approachStrength);
+      const dist = pos.length()
+      const scaleBoost = THREE.MathUtils.clamp(
+        (1 / (dist + 0.2)) * 4 * asteroid.orbit.approachStrength,
+        0.35,
+        2.3,
+      )
+      const glowBoost = THREE.MathUtils.clamp(
+        (1 / (dist + 0.2)) * 2.8,
+        0.2,
+        1.9,
+      )
       const intensity = hazardMode
         ? asteroid.hazardous
           ? 0.7 + glowBoost
           : 0.08
-        : 0.2 + glowBoost * 0.35;
+        : 0.2 + glowBoost * 0.35
+      const targetScale = size * (1 + scaleBoost * 0.5)
 
-      meshRef.current.position.copy(pos);
-      meshRef.current.scale.setScalar(size * (1 + scaleBoost * 0.5));
-      meshRef.current.material.emissiveIntensity = intensity;
+      smoothScaleRef.current = THREE.MathUtils.lerp(
+        smoothScaleRef.current,
+        targetScale,
+        0.14,
+      )
+      smoothEmissiveRef.current = THREE.MathUtils.lerp(
+        smoothEmissiveRef.current,
+        intensity,
+        0.16,
+      )
+
+      meshRef.current.position.copy(pos)
+      meshRef.current.scale.setScalar(smoothScaleRef.current)
+      meshRef.current.material.emissiveIntensity = smoothEmissiveRef.current
     }
+  })
 
-    setTrailPosition(pos);
-  });
+  const handleClick = useCallback(
+    (event) => {
+      event.stopPropagation()
+      onSelect(asteroid)
+    },
+    [asteroid, onSelect],
+  )
 
   return (
     <group>
       <mesh
         ref={meshRef}
-        onClick={(event) => {
-          event.stopPropagation();
-          onSelect(asteroid);
-        }}
-        onPointerOver={(event) => {
-          event.stopPropagation();
-          setHovered(true);
-        }}
-        onPointerOut={() => setHovered(false)}
+        onClick={handleClick}
       >
-        <sphereGeometry args={[1, 18, 18]} />
+        <sphereGeometry args={[1, 10, 10]} />
         <meshStandardMaterial
           color={hazardMode ? radarColor : baseColor}
           roughness={0.35}
@@ -63,26 +89,12 @@ function Asteroid({ asteroid, hazardMode, onSelect }) {
         />
       </mesh>
 
-      {hovered && meshRef.current && (
-        <Text
-          position={[meshRef.current.position.x, meshRef.current.position.y + 0.22, meshRef.current.position.z]}
-          fontSize={0.14}
-          color="#f3f6ff"
-          anchorX="center"
-          anchorY="bottom"
-          outlineWidth={0.006}
-          outlineColor="#03050d"
-        >
-          {asteroid.name}
-        </Text>
-      )}
-
       <AsteroidTrail
         color={hazardMode && asteroid.hazardous ? '#ff4d4d' : '#8bb8ff'}
-        currentPosition={trailPosition}
+        currentPositionRef={positionRef}
       />
     </group>
-  );
+  )
 }
 
-export default memo(Asteroid);
+export default memo(Asteroid)
