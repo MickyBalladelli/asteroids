@@ -14,6 +14,12 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) 
 
   const baseColor = asteroid.hazardous ? '#ff5c5c' : '#f4f7ff'
   const radarColor = asteroid.hazardous ? '#ff2222' : '#44506e'
+  const asteroidColor = asteroid.hazardous
+    ? '#ff5c5c'
+    : hazardMode
+      ? radarColor
+      : baseColor
+  const emissiveColor = asteroid.hazardous ? '#ff1515' : '#526cff'
 
   const size = useMemo(
     () =>
@@ -92,10 +98,10 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) 
       >
         <sphereGeometry args={[1, 10, 10]} />
         <meshStandardMaterial
-          color={hazardMode ? radarColor : baseColor}
+          color={asteroidColor}
           roughness={0.35}
           metalness={0.12}
-          emissive={hazardMode && asteroid.hazardous ? '#ff1515' : '#526cff'}
+          emissive={emissiveColor}
           emissiveIntensity={0.25}
         />
       </mesh>
