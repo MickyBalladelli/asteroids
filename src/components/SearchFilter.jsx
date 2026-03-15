@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
+import Autocomplete from '@mui/material/Autocomplete'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import FormControl from '@mui/material/FormControl'
@@ -31,10 +32,12 @@ const labelSx = {
 function SearchFilter({
   searchText,
   onSearchChange,
+  onSearchSelect,
   hazardFilter,
   onHazardFilterChange,
   sizeFilter,
   onSizeFilterChange,
+  searchOptions = [],
   inline = false,
 }) {
   return (
@@ -52,28 +55,55 @@ function SearchFilter({
         background: inline ? 'transparent' : 'rgba(7, 16, 35, 0.92)',
       }}
     >
-      <TextField
-        size="small"
-        placeholder="Search asteroids…"
-        value={searchText}
-        onChange={(e) => onSearchChange(e.target.value)}
+      <Autocomplete
+        freeSolo
+        options={searchOptions}
+        value={null}
+        inputValue={searchText}
+        onInputChange={(_, value) => onSearchChange(value)}
+        onChange={(_, value) => {
+          const nextValue = value || ''
+          onSearchChange(nextValue)
+          if (nextValue && onSearchSelect) {
+            onSearchSelect(nextValue)
+          }
+        }}
+        filterOptions={(options, state) => {
+          const term = state.inputValue.trim().toLowerCase()
+          if (!term) return options.slice(0, 12)
+          return options
+            .filter((name) => name.toLowerCase().includes(term))
+            .slice(0, 12)
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            placeholder="Search asteroids…"
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: (
+                <>
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }} />
+                  </InputAdornment>
+                  {params.InputProps.startAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
         sx={{
           width: inline ? { xs: '100%', sm: 240 } : '100%',
-          '& .MuiOutlinedInput-root': {
+          '& .MuiOutlinedInput-root, & .MuiAutocomplete-inputRoot': {
             color: '#e0e7ff',
             fontSize: '0.8rem',
             '& fieldset': { borderColor: 'rgba(255,255,255,0.18)' },
             '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.35)' },
             '&.Mui-focused fieldset': { borderColor: '#65F9FF' },
           },
-        }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }} />
-              </InputAdornment>
-            ),
+          '& .MuiAutocomplete-popupIndicator, & .MuiAutocomplete-clearIndicator': {
+            color: 'rgba(255,255,255,0.5)',
           },
         }}
       />

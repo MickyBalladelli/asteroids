@@ -89,6 +89,21 @@ function Home() {
     return result
   }, [asteroids, searchText, hazardFilter, sizeFilter])
 
+  const searchOptions = useMemo(
+    () => [...new Set(asteroids.map((a) => a.name))].sort((a, b) => a.localeCompare(b)),
+    [asteroids],
+  )
+
+  const handleSearchSelect = useCallback(
+    (name) => {
+      const match = asteroids.find((asteroid) => asteroid.name === name)
+      if (match) {
+        setSelectedAsteroid(match)
+      }
+    },
+    [asteroids],
+  )
+
   const selectedIndex = useMemo(() => {
     if (!selectedAsteroid) return -1
     return filteredAsteroids.findIndex((a) => a.id === selectedAsteroid.id)
@@ -126,6 +141,8 @@ function Home() {
         loading={loading}
         searchText={searchText}
         onSearchChange={setSearchText}
+        onSearchSelect={handleSearchSelect}
+        searchOptions={searchOptions}
         hazardFilter={hazardFilter}
         onHazardFilterChange={setHazardFilter}
         sizeFilter={sizeFilter}

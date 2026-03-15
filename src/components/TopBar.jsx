@@ -16,6 +16,8 @@ function TopBar({
   loading,
   searchText,
   onSearchChange,
+  onSearchSelect,
+  searchOptions,
   hazardFilter,
   onHazardFilterChange,
   sizeFilter,
@@ -116,6 +118,8 @@ function TopBar({
           inline
           searchText={searchText}
           onSearchChange={onSearchChange}
+          onSearchSelect={onSearchSelect}
+          searchOptions={searchOptions}
           hazardFilter={hazardFilter}
           onHazardFilterChange={onHazardFilterChange}
           sizeFilter={sizeFilter}
