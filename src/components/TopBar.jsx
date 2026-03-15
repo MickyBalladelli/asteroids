@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Switch from '@mui/material/Switch'
 import CircularProgress from '@mui/material/CircularProgress'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -5,6 +6,12 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Link from '@mui/material/Link'
 import TimeSlider from './TimeSlider'
 import SearchFilter from './SearchFilter'
 import ThreatPanel from './ThreatPanel'
@@ -32,6 +39,8 @@ function TopBar({
   asteroids,
   onSelectAsteroid,
 }) {
+  const [aboutOpen, setAboutOpen] = useState(false)
+
   return (
     <Box
       sx={{
@@ -155,6 +164,24 @@ function TopBar({
           </Box>
 
           {loading && <CircularProgress size={22} color="info" />}
+
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setAboutOpen(true)}
+            sx={{
+              color: '#d8e8ff',
+              borderColor: 'rgba(140, 180, 255, 0.45)',
+              textTransform: 'none',
+              fontSize: '0.78rem',
+              '&:hover': {
+                borderColor: 'rgba(140, 180, 255, 0.8)',
+                bgcolor: 'rgba(140, 180, 255, 0.08)',
+              },
+            }}
+          >
+            About
+          </Button>
         </Box>
       </Box>
 
@@ -174,6 +201,83 @@ function TopBar({
           <ThreatPanel asteroids={asteroids} onSelect={onSelectAsteroid} />
         )}
       </Box>
+
+      <Dialog
+        open={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'linear-gradient(160deg, rgba(12,20,40,0.96), rgba(8,14,28,0.97))',
+            border: '1px solid rgba(101,249,255,0.28)',
+            color: '#eaf2ff',
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1, color: '#65F9FF', fontWeight: 700 }}>
+          About Asteroid Tracker
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ borderColor: 'rgba(140,170,220,0.22)' }}>
+          <Typography sx={{ m: 0, mb: 1.1, fontSize: '0.95rem' }}>
+            Author: <strong>Micky Balladelli</strong>
+          </Typography>
+
+          <Typography sx={{ m: 0, mb: 1.1, fontSize: '0.9rem', lineHeight: 1.55 }}>
+            Source code:{' '}
+            <Link
+              href="https://github.com/MickyBalladelli/asteroids"
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: '#9cd6ff' }}
+            >
+              github.com/MickyBalladelli/asteroids
+            </Link>
+          </Typography>
+
+          <Typography sx={{ m: 0, mb: 1.1, fontSize: '0.9rem', lineHeight: 1.55 }}>
+            Data source: NASA Open APIs (Near Earth Object feed).{' '}
+            <Link
+              href="https://api.nasa.gov/neo/rest/v1/feed?start_date=2026-03-15&end_date=2026-03-16&api_key=DEMO_KEY"
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: '#9cd6ff' }}
+            >
+              api.nasa.gov
+            </Link>{' '}
+            |{' '}
+            <Link
+              href="https://api.nasa.gov/"
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: '#9cd6ff' }}
+            >
+              NEO Feed endpoint (/neo/rest/v1/feed)
+            </Link>
+          </Typography>
+
+          <Typography sx={{ m: 0, fontSize: '0.84rem', color: 'rgba(208,223,245,0.86)', lineHeight: 1.7 }}>
+            This app visualizes near-earth asteroid trajectories with interactive filtering,
+            threat scoring, radar modes, and focused camera tracking. Threat labels are a
+            local model-based ranking and should not be interpreted as official impact
+            predictions.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 2, py: 1.1 }}>
+          <Button
+            onClick={() => setAboutOpen(false)}
+            variant="contained"
+            sx={{ textTransform: 'none' }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
