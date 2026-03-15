@@ -167,7 +167,7 @@ npm run dev
 - Endpoint used: NEO feed (`/neo/rest/v1/feed`)
 - Date range must stay within NASA NEO feed limits.
 
-![ Asteroids Tracker ](docs/tracker.png) 
+![ Asteroids Tracker ](src/docs/tracker.png) 
 ## GIF Demo Suggestion
 
 Record a short walkthrough showing:
