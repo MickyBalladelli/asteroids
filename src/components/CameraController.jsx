@@ -4,50 +4,61 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
 const _offset = new THREE.Vector3()
-const _desiredCameraPos = new THREE.Vector3()
 
 const MIN_SAFE_DISTANCE = 2
+const DEFAULT_FOLLOW_DISTANCE = 16
 
 function CameraController({ selectedAsteroid, positionsRef, ...orbitProps }) {
   const controlsRef = useRef()
   const prevIdRef = useRef(null)
   const transitioningRef = useRef(false)
+  const followDistRef = useRef(DEFAULT_FOLLOW_DISTANCE)
 
   useFrame((state, delta) => {
     const controls = controlsRef.current
     if (!controls) return
 
-    // Let OrbitControls process user input first (zoom/orbit), then we recenter.
-    controls.update()
-
     const id = selectedAsteroid?.id ?? null
     if (id !== prevIdRef.current) {
+      const isNewSelection = Boolean(id)
       prevIdRef.current = id
-      transitioningRef.current = Boolean(id)
+      transitioningRef.current = isNewSelection
+      if (isNewSelection) {
+        followDistRef.current = DEFAULT_FOLLOW_DISTANCE
+      }
     }
 
-    controls.zoomToCursor = false
     controls.enablePan = id ? false : (orbitProps.enablePan ?? true)
 
-    if (!id) return
+    if (!id) {
+      controls.update()
+      return
+    }
+
     const targetPos = positionsRef.current?.[id]
-    if (!targetPos) return
+    if (!targetPos) {
+      controls.update()
+      return
+    }
+
+    // Let OrbitControls process zoom/rotate input first
+    controls.update()
+
+    // Read the distance OrbitControls settled on (reflects user zoom)
+    const currentDist = state.camera.position.distanceTo(controls.target)
+    followDistRef.current = Math.max(currentDist, MIN_SAFE_DISTANCE)
+
+    // Compute viewing direction from current camera orientation
+    _offset.copy(state.camera.position).sub(controls.target)
+    if (_offset.lengthSq() < 1e-6) {
+      _offset.set(0, 1.6, 8)
+    }
+    _offset.normalize().multiplyScalar(followDistRef.current)
 
     const camera = state.camera
     const t = 1 - Math.pow(0.03, delta)
 
-    _offset.copy(camera.position).sub(controls.target)
-
-    if (_offset.lengthSq() < 1e-6) {
-      _offset.set(0, 1.6, 8)
-    }
-
-    const distance = _offset.length()
-    if (distance < MIN_SAFE_DISTANCE) {
-      _offset.multiplyScalar(MIN_SAFE_DISTANCE / Math.max(distance, 1e-6))
-    }
-
-    // Keep the selected asteroid centered while preserving user-controlled zoom/orbit offset.
+    // Move target to follow the asteroid
     if (transitioningRef.current) {
       controls.target.lerp(targetPos, t)
       if (controls.target.distanceTo(targetPos) < 0.02) {
@@ -58,15 +69,12 @@ function CameraController({ selectedAsteroid, positionsRef, ...orbitProps }) {
       controls.target.copy(targetPos)
     }
 
-    _desiredCameraPos.copy(controls.target).add(_offset)
-
-    if (transitioningRef.current) {
-      camera.position.lerp(_desiredCameraPos, t)
-    } else {
-      camera.position.copy(_desiredCameraPos)
-    }
-
+    // Position camera at the preserved distance / angle from the new target
+    camera.position.copy(controls.target).add(_offset)
     camera.lookAt(controls.target)
+
+    // Sync OrbitControls' internal state so it doesn't fight us next frame
+    controls.update()
   })
 
   return (

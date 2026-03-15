@@ -6,11 +6,6 @@ import { EARTH_RADIUS_UNITS } from '../utils/orbitMath'
 
 const EARTH_RADIUS_KM = 6371
 const KM_PER_UNIT = EARTH_RADIUS_KM / EARTH_RADIUS_UNITS
-const _radial = new THREE.Vector3()
-const _labelBase = new THREE.Vector3()
-const _toCamera = new THREE.Vector3()
-const _side = new THREE.Vector3()
-const _up = new THREE.Vector3()
 
 function DistanceLine({ positionsRef, selectedId }) {
   const lineRef = useRef()
@@ -27,7 +22,7 @@ function DistanceLine({ positionsRef, selectedId }) {
     return g
   }, [])
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!selectedId || !positionsRef.current?.[selectedId]) {
       if (groupRef.current) groupRef.current.visible = false
       return
@@ -46,37 +41,9 @@ function DistanceLine({ positionsRef, selectedId }) {
       lineRef.current.computeLineDistances()
     }
 
+    // Place label group at asteroid position — pixel offset handled in CSS
     if (labelGroupRef.current) {
-      _radial.copy(pos)
-      if (_radial.lengthSq() < 1e-6) {
-        _radial.set(0, 1, 0)
-      } else {
-        _radial.normalize()
-      }
-
-      // Place label between Earth and asteroid, very close to the asteroid.
-      _labelBase.copy(pos).multiplyScalar(0.9)
-
-      // Add a small camera-aware side offset so the label doesn't overlap the asteroid.
-      _toCamera.copy(state.camera.position).sub(_labelBase).normalize()
-      _side.crossVectors(_radial, _toCamera)
-      if (_side.lengthSq() < 1e-6) {
-        _side.crossVectors(_radial, state.camera.up)
-      }
-      _side.normalize()
-
-      _up.crossVectors(_toCamera, _side).normalize()
-
-      const cameraDist = state.camera.position.distanceTo(pos)
-      const sideOffset = THREE.MathUtils.clamp(cameraDist * 0.11, 0.9, 2.8)
-      const upOffset = THREE.MathUtils.clamp(cameraDist * 0.06, 0.35, 1.4)
-      const towardCamera = THREE.MathUtils.clamp(cameraDist * 0.03, 0.12, 0.55)
-
-      labelGroupRef.current.position
-        .copy(_labelBase)
-        .addScaledVector(_side, sideOffset)
-        .addScaledVector(_up, upOffset)
-        .addScaledVector(_toCamera, towardCamera)
+      labelGroupRef.current.position.set(pos.x, pos.y, pos.z)
     }
 
     const distUnits = pos.length()
@@ -105,7 +72,10 @@ function DistanceLine({ positionsRef, selectedId }) {
       <group ref={labelGroupRef}>
         <Html
           center
-          style={{ pointerEvents: 'none' }}
+          style={{
+            pointerEvents: 'none',
+            transform: 'translate(0, -32px)',
+          }}
           zIndexRange={[120, 0]}
           occlude={false}
         >
