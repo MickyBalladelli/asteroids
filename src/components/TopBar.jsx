@@ -91,7 +91,7 @@ function TopBar({
               />
             }
             label="Hazard Radar"
-            sx={{ m: 0 }}
+            sx={{ m: 0, marginLeft: 10 }}
           />
 
           <FormControlLabel
