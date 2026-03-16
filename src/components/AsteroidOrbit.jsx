@@ -11,6 +11,8 @@ function AsteroidOrbit({
   isSelected,
   threatScore,
   onSelect,
+  onHover,
+  onHoverEnd,
 }) {
   const points = useMemo(() => sampleOrbit(orbit, 96), [orbit])
 
@@ -40,6 +42,32 @@ function AsteroidOrbit({
     [asteroid, onSelect],
   )
 
+  const handlePointerOver = useCallback(
+    (event) => {
+      event.stopPropagation()
+      document.body.style.cursor = 'pointer'
+      onHover?.(event, asteroid)
+    },
+    [asteroid, onHover],
+  )
+
+  const handlePointerMove = useCallback(
+    (event) => {
+      event.stopPropagation()
+      onHover?.(event, asteroid)
+    },
+    [asteroid, onHover],
+  )
+
+  const handlePointerOut = useCallback(
+    (event) => {
+      event.stopPropagation()
+      document.body.style.cursor = 'auto'
+      onHoverEnd?.()
+    },
+    [onHoverEnd],
+  )
+
   return (
     <group>
       <line geometry={lineGeometry} frustumCulled={false} raycast={() => null}>
@@ -56,8 +84,9 @@ function AsteroidOrbit({
         geometry={tubeGeometry}
         frustumCulled={false}
         onClick={handleClick}
-        onPointerOver={() => { document.body.style.cursor = 'pointer' }}
-        onPointerOut={() => { document.body.style.cursor = 'auto' }}
+        onPointerOver={handlePointerOver}
+        onPointerMove={handlePointerMove}
+        onPointerOut={handlePointerOut}
       >
         <meshBasicMaterial visible={false} />
       </mesh>

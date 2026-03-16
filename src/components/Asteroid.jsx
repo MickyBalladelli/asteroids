@@ -35,7 +35,15 @@ function makeRockyGeometry(seed) {
   return geo
 }
 
-function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) {
+function Asteroid({
+  asteroid,
+  hazardMode,
+  onSelect,
+  isSelected,
+  positionsRef,
+  onHover,
+  onHoverEnd,
+}) {
   const meshRef = useRef()
   const glowRef = useRef()
   const positionRef = useRef(new THREE.Vector3())
@@ -162,12 +170,41 @@ function Asteroid({ asteroid, hazardMode, onSelect, isSelected, positionsRef }) 
     [asteroid, onSelect],
   )
 
+  const handlePointerOver = useCallback(
+    (event) => {
+      event.stopPropagation()
+      document.body.style.cursor = 'pointer'
+      onHover?.(event, asteroid)
+    },
+    [asteroid, onHover],
+  )
+
+  const handlePointerMove = useCallback(
+    (event) => {
+      event.stopPropagation()
+      onHover?.(event, asteroid)
+    },
+    [asteroid, onHover],
+  )
+
+  const handlePointerOut = useCallback(
+    (event) => {
+      event.stopPropagation()
+      document.body.style.cursor = 'auto'
+      onHoverEnd?.()
+    },
+    [onHoverEnd],
+  )
+
   return (
     <group>
       <mesh
         ref={meshRef}
         geometry={rockyGeo}
         onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerMove={handlePointerMove}
+        onPointerOut={handlePointerOut}
       >
         <meshStandardMaterial
           color={rockyColor}

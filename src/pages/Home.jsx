@@ -64,6 +64,7 @@ function Home() {
   const [searchText, setSearchText] = useState('')
   const [hazardFilter, setHazardFilter] = useState('all')
   const [sizeFilter, setSizeFilter] = useState('all')
+  const [hoverInfo, setHoverInfo] = useState(null)
 
   const positionsRef = useRef({})
   const daysAhead = PRESET_TO_DAYS[timePreset]
@@ -164,6 +165,30 @@ function Home() {
     setSelectedAsteroid(filteredAsteroids[idx])
   }, [filteredAsteroids, selectedIndex])
 
+  const handleAsteroidHover = useCallback((event, asteroid) => {
+    const sourceEvent = event?.nativeEvent || event
+    if (!sourceEvent) return
+
+    setHoverInfo({
+      id: asteroid.id,
+      name: asteroid.name,
+      distanceKm: asteroid.missDistanceKm,
+      x: sourceEvent.clientX,
+      y: sourceEvent.clientY,
+    })
+  }, [])
+
+  const handleAsteroidHoverEnd = useCallback(() => {
+    setHoverInfo(null)
+  }, [])
+
+  const hoverDistanceLabel = useMemo(() => {
+    if (!hoverInfo) return ''
+    return Number(hoverInfo.distanceKm || 0).toLocaleString(undefined, {
+      maximumFractionDigits: 0,
+    })
+  }, [hoverInfo])
+
   return (
     <Box
       sx={{
@@ -253,6 +278,8 @@ function Home() {
           onSelect={setSelectedAsteroid}
           selectedId={selectedAsteroid?.id || null}
           positionsRef={positionsRef}
+          onHover={handleAsteroidHover}
+          onHoverEnd={handleAsteroidHoverEnd}
         />
         <DistanceLine
           positionsRef={positionsRef}
@@ -271,6 +298,48 @@ function Home() {
           minPolarAngle={0.2}
         />
       </Canvas>
+
+      {hoverInfo && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: hoverInfo.x + 14,
+            top: hoverInfo.y + 14,
+            zIndex: 40,
+            pointerEvents: 'none',
+            px: 1.2,
+            py: 0.7,
+            borderRadius: 1.5,
+            background: 'rgba(8, 16, 34, 0.9)',
+            border: '1px solid rgba(130, 178, 255, 0.45)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+            minWidth: 130,
+          }}
+        >
+          <Box
+            component="p"
+            sx={{
+              m: 0,
+              fontSize: '0.76rem',
+              fontWeight: 600,
+              color: '#e8f1ff',
+              lineHeight: 1.35,
+            }}
+          >
+            {hoverInfo.name}
+          </Box>
+          <Box
+            component="p"
+            sx={{
+              m: 0,
+              fontSize: '0.7rem',
+              color: 'rgba(204, 224, 255, 0.9)',
+            }}
+          >
+            {`Distance: ${hoverDistanceLabel} km`}
+          </Box>
+        </Box>
+      )}
     </Box>
   )
 }
