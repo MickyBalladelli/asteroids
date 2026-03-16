@@ -145,12 +145,6 @@ npm run dev
 - Endpoint used: NEO feed (`/neo/rest/v1/feed`)
 - Date range must stay within NASA NEO feed limits.
 
-## Future Features
-
-- Realistic orbital mechanics with ephemeris models
-- VR mode for immersive asteroid exploration
-- Collision prediction and simulation overlays
-- Earth satellite and debris tracking layers
 
 ## License
 
