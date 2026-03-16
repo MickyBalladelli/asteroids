@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Stars } from '@react-three/drei'
 import Box from '@mui/material/Box'
@@ -68,6 +68,23 @@ function Home() {
   const positionsRef = useRef({})
   const daysAhead = PRESET_TO_DAYS[timePreset]
   const { asteroids, loading, stats } = useAsteroids(daysAhead, atScale)
+
+  useEffect(() => {
+    if (asteroids.length === 0) {
+      setSelectedAsteroid(null)
+      return
+    }
+
+    if (!selectedAsteroid) {
+      setSelectedAsteroid(asteroids[0])
+      return
+    }
+
+    const stillExists = asteroids.some((a) => a.id === selectedAsteroid.id)
+    if (!stillExists) {
+      setSelectedAsteroid(asteroids[0])
+    }
+  }, [asteroids, selectedAsteroid])
 
   const filterScopedAsteroids = useMemo(() => {
     let result = asteroids
@@ -205,6 +222,7 @@ function Home() {
         camera={{ position: [0, 36, 110], fov: 48, near: 0.1, far: 20000 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
+        raycaster={{ params: { Line: { threshold: 0.85 } } }}
       >
         <color attach="background" args={['#02040b']} />
 

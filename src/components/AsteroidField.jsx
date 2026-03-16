@@ -8,11 +8,13 @@ function AsteroidField({ asteroids, hazardMode, onSelect, selectedId, positionsR
       {asteroids.map((asteroid) => (
         <group key={asteroid.id}>
           <AsteroidOrbit
+            asteroid={asteroid}
             orbit={asteroid.orbit}
             hazardMode={hazardMode}
             hazardous={asteroid.hazardous}
             isSelected={asteroid.id === selectedId}
             threatScore={asteroid.threatScore}
+            onSelect={onSelect}
           />
           <Asteroid
             asteroid={asteroid}
