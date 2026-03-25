@@ -8,6 +8,10 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      ignore: (id) => id.includes('wasm-build'),
+    },
   },
   server: {
     proxy: {
