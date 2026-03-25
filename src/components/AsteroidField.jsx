@@ -22,6 +22,7 @@ function AsteroidField({
             hazardous={asteroid.hazardous}
             isSelected={asteroid.id === selectedId}
             threatScore={asteroid.threatScore}
+            earthCrossing={asteroid.earthCrossing}
             onSelect={onSelect}
             onHover={onHover}
             onHoverEnd={onHoverEnd}

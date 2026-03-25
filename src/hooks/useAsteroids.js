@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchAsteroidsByRange } from '../utils/api'
-import { buildOrbitFromAsteroid } from '../utils/orbitMath'
+import { buildOrbitFromAsteroid, isEarthCrossing } from '../utils/orbitMath'
 import { computeThreatScore } from '../utils/threatScore'
 
 function normalizeAsteroid(item, atScale) {
@@ -23,6 +23,7 @@ function normalizeAsteroid(item, atScale) {
   return {
     ...asteroid,
     threatScore: computeThreatScore(asteroid),
+    earthCrossing: isEarthCrossing(asteroid),
     orbit: buildOrbitFromAsteroid(asteroid, atScale),
   }
 }
@@ -65,10 +66,14 @@ export default function useAsteroids(daysAhead, atScale = true) {
     const hazardousCount = asteroids.filter(
       (asteroid) => asteroid.hazardous,
     ).length
+    const earthCrossingCount = asteroids.filter(
+      (asteroid) => asteroid.earthCrossing,
+    ).length
     return {
       total: asteroids.length,
       hazardous: hazardousCount,
       safe: Math.max(asteroids.length - hazardousCount, 0),
+      earthCrossing: earthCrossingCount,
     }
   }, [asteroids])
 

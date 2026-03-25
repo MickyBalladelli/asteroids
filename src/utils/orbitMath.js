@@ -4,6 +4,10 @@ const TAU = Math.PI * 2
 const EARTH_RADIUS_KM = 6371
 export const EARTH_RADIUS_UNITS = 1.5
 const KM_TO_UNITS = EARTH_RADIUS_UNITS / EARTH_RADIUS_KM
+// Asteroids passing within the Moon's orbital distance are classed as Earth-crossing
+export const LUNAR_DISTANCE_KM = 384400
+export const isEarthCrossing = (asteroid) =>
+  (asteroid.missDistanceKm || Infinity) < LUNAR_DISTANCE_KM
 
 const hashToUnit = (value) => {
   let hash = 0

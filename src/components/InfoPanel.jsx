@@ -59,6 +59,19 @@ function InfoPanel({ asteroid, currentIndex, totalCount, onPrev, onNext }) {
             label={asteroid?.hazardous ? 'NASA: Hazardous' : 'NASA: Safe'}
             color={asteroid?.hazardous ? 'error' : 'success'}
           />
+          {asteroid?.earthCrossing && (
+            <Chip
+              size="small"
+              label="Earth-Crossing"
+              sx={{
+                bgcolor: 'rgba(255,69,0,0.15)',
+                color: '#ff6b35',
+                border: '1px solid rgba(255,69,0,0.5)',
+                fontWeight: 700,
+                fontSize: '0.68rem',
+              }}
+            />
+          )}
           {asteroid?.threatScore != null && (
             <Chip
               size="small"

@@ -10,6 +10,7 @@ function AsteroidOrbit({
   hazardous,
   isSelected,
   threatScore,
+  earthCrossing,
   onSelect,
   onHover,
   onHoverEnd,
@@ -28,11 +29,12 @@ function AsteroidOrbit({
 
   const color = useMemo(() => {
     if (isSelected) return new THREE.Color('#65f9ff')
+    if (earthCrossing) return new THREE.Color('#ff4500')
     if (hazardMode) return new THREE.Color(getThreatColor(threatScore || 0))
     return new THREE.Color(hazardous ? '#f37b7b' : '#86b0ff')
-  }, [hazardMode, hazardous, isSelected, threatScore])
+  }, [earthCrossing, hazardMode, hazardous, isSelected, threatScore])
 
-  const opacity = isSelected ? 0.95 : hazardMode ? 0.45 : 0.25
+  const opacity = isSelected ? 0.95 : earthCrossing ? 0.75 : hazardMode ? 0.45 : 0.25
 
   const handleClick = useCallback(
     (event) => {
