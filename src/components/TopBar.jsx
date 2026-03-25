@@ -94,6 +94,49 @@ function TopBar({
           </Typography>
         </Box>
 
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showSatellites}
+              onChange={(event) => onToggleSatellites(event.target.checked)}
+            />
+          }
+          label="Satellites"
+          sx={{ m: 0 }}
+        />
+
+        {showSatellites && satellites && satellites.length > 0 && (
+          <Select
+            size="small"
+            value={selectedSatelliteId || ''}
+            onChange={(e) => {
+              const sat = satellites.find((s) => s.id === e.target.value)
+              if (sat) onSelectSatellite(sat)
+            }}
+            displayEmpty
+            sx={{
+              color: '#e0e8f5',
+              fontSize: '0.75rem',
+              height: 32,
+              minWidth: 160,
+              '.MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(0,230,176,0.35)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(0,230,176,0.65)',
+              },
+              '.MuiSelect-icon': { color: 'rgba(0,230,176,0.6)' },
+            }}
+            aria-label="Select satellite"
+          >
+            {satellites.map((sat) => (
+              <MenuItem key={sat.id} value={sat.id} sx={{ fontSize: '0.78rem' }}>
+                {sat.name}
+              </MenuItem>
+            ))}
+          </Select>
+        )}
+
         <Box
           sx={{
             ml: 'auto',
@@ -153,69 +196,24 @@ function TopBar({
                 label="At Scale"
                 sx={{ m: 0 }}
               />
+
+              <Box
+                sx={{
+                  borderRadius: 1.5,
+                  background: 'rgba(255,255,255,0.05)',
+                  px: 1.5,
+                  py: 1,
+                  fontSize: '0.75rem',
+                }}
+              >
+                <Typography sx={{ m: 0, color: 'rgb(203, 213, 225)' }}>
+                  Asteroids: {asteroidCount}
+                </Typography>
+                <Typography sx={{ m: 0, color: '#ff9a9a' }}>
+                  Hazardous: {hazardousCount}
+                </Typography>
+              </Box>
             </>
-          )}
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showSatellites}
-                onChange={(event) => onToggleSatellites(event.target.checked)}
-              />
-            }
-            label="Satellites"
-            sx={{ m: 0 }}
-          />
-
-          {showSatellites && satellites && satellites.length > 0 && (
-            <Select
-              size="small"
-              value={selectedSatelliteId || ''}
-              onChange={(e) => {
-                const sat = satellites.find((s) => s.id === e.target.value)
-                if (sat) onSelectSatellite(sat)
-              }}
-              displayEmpty
-              sx={{
-                color: '#e0e8f5',
-                fontSize: '0.75rem',
-                height: 32,
-                minWidth: 160,
-                '.MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(0,230,176,0.35)',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(0,230,176,0.65)',
-                },
-                '.MuiSelect-icon': { color: 'rgba(0,230,176,0.6)' },
-              }}
-              aria-label="Select satellite"
-            >
-              {satellites.map((sat) => (
-                <MenuItem key={sat.id} value={sat.id} sx={{ fontSize: '0.78rem' }}>
-                  {sat.name}
-                </MenuItem>
-              ))}
-            </Select>
-          )}
-
-          {!showSatellites && (
-            <Box
-              sx={{
-                borderRadius: 1.5,
-                background: 'rgba(255,255,255,0.05)',
-                px: 1.5,
-                py: 1,
-                fontSize: '0.75rem',
-              }}
-            >
-              <Typography sx={{ m: 0, color: 'rgb(203, 213, 225)' }}>
-                Asteroids: {asteroidCount}
-              </Typography>
-              <Typography sx={{ m: 0, color: '#ff9a9a' }}>
-                Hazardous: {hazardousCount}
-              </Typography>
-            </Box>
           )}
 
           {loading && <CircularProgress size={22} color="info" />}

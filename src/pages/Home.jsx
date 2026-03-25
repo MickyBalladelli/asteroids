@@ -94,6 +94,8 @@ function Home() {
   }, [showSatellites, satelliteData])
 
   useEffect(() => {
+    if (showSatellites) return
+
     if (asteroids.length === 0) {
       setSelectedAsteroid(null)
       return
@@ -108,7 +110,7 @@ function Home() {
     if (!stillExists) {
       setSelectedAsteroid(asteroids[0])
     }
-  }, [asteroids, selectedAsteroid])
+  }, [asteroids, selectedAsteroid, showSatellites])
 
   const filterScopedAsteroids = useMemo(() => {
     let result = asteroids
@@ -245,7 +247,10 @@ function Home() {
         asteroids={displayedAsteroids}
         onSelectAsteroid={setSelectedAsteroid}
         showSatellites={showSatellites}
-        onToggleSatellites={setShowSatellites}
+        onToggleSatellites={(val) => {
+          setShowSatellites(val)
+          if (val) setSelectedAsteroid(null)
+        }}
         satellites={satelliteData}
         selectedSatelliteId={selectedSatellite?.id || null}
         onSelectSatellite={setSelectedSatellite}
@@ -318,7 +323,7 @@ function Home() {
           asteroids={displayedAsteroids}
           hazardMode={hazardMode}
           onSelect={setSelectedAsteroid}
-          selectedId={selectedAsteroid?.id || null}
+          selectedId={showSatellites ? null : (selectedAsteroid?.id || null)}
           positionsRef={positionsRef}
           onHover={handleAsteroidHover}
           onHoverEnd={handleAsteroidHoverEnd}
@@ -333,8 +338,8 @@ function Home() {
         )}
         <DistanceLine
           positionsRef={positionsRef}
-          selectedId={selectedAsteroid?.id || null}
-          selectedName={selectedAsteroid?.name || ''}
+          selectedId={showSatellites ? null : (selectedAsteroid?.id || null)}
+          selectedName={showSatellites ? '' : (selectedAsteroid?.name || '')}
         />
 
         <CameraController
