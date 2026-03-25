@@ -6,6 +6,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['satellite.js'],
   },
+  build: {
+    target: 'esnext',
+  },
   server: {
     proxy: {
       '/celestrak': {
