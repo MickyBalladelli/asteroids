@@ -10,7 +10,10 @@ import TopBar from '../components/TopBar'
 import InfoPanel from '../components/InfoPanel'
 import CameraController from '../components/CameraController'
 import DistanceLine from '../components/DistanceLine'
+import SatelliteLayer from '../components/SatelliteLayer'
+import SatelliteInfoPanel from '../components/SatelliteInfoPanel'
 import useAsteroids from '../hooks/useAsteroids'
+import useSatellites from '../hooks/useSatellites'
 
 const PRESET_TO_DAYS = [0, 7, 30]
 
@@ -66,9 +69,29 @@ function Home() {
   const [sizeFilter, setSizeFilter] = useState('all')
   const [hoverInfo, setHoverInfo] = useState(null)
 
+  const [showSatellites, setShowSatellites] = useState(false)
+  const [selectedSatellite, setSelectedSatellite] = useState(null)
+
   const positionsRef = useRef({})
+  const satellitePositionsRef = useRef({})
   const daysAhead = PRESET_TO_DAYS[timePreset]
   const { asteroids, loading, stats } = useAsteroids(daysAhead, atScale)
+  const { satellites: satelliteData } = useSatellites(showSatellites)
+
+  // Auto-select ISS when satellite data first loads; clear selection when hidden
+  const autoSelectedRef = useRef(false)
+  useEffect(() => {
+    if (!showSatellites) {
+      setSelectedSatellite(null)
+      autoSelectedRef.current = false
+      return
+    }
+    if (satelliteData.length > 0 && !autoSelectedRef.current) {
+      autoSelectedRef.current = true
+      const iss = satelliteData.find((s) => s.name.includes('ISS'))
+      setSelectedSatellite(iss || satelliteData[0])
+    }
+  }, [showSatellites, satelliteData])
 
   useEffect(() => {
     if (asteroids.length === 0) {
@@ -221,6 +244,11 @@ function Home() {
         onSizeFilterChange={setSizeFilter}
         asteroids={displayedAsteroids}
         onSelectAsteroid={setSelectedAsteroid}
+        showSatellites={showSatellites}
+        onToggleSatellites={setShowSatellites}
+        satellites={satelliteData}
+        selectedSatelliteId={selectedSatellite?.id || null}
+        onSelectSatellite={setSelectedSatellite}
       />
 
       <Box
@@ -232,7 +260,7 @@ function Home() {
           pointerEvents: 'none',
         }}
       >
-        {selectedAsteroid && (
+        {!showSatellites && selectedAsteroid && (
           <InfoPanel
             asteroid={selectedAsteroid}
             currentIndex={selectedIndex}
@@ -242,6 +270,20 @@ function Home() {
           />
         )}
       </Box>
+
+      {showSatellites && selectedSatellite && (
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 24,
+            right: 24,
+            zIndex: 20,
+            pointerEvents: 'none',
+          }}
+        >
+          <SatelliteInfoPanel sat={selectedSatellite} />
+        </Box>
+      )}
 
       <Canvas
         camera={{ position: [0, 36, 110], fov: 48, near: 0.1, far: 20000 }}
@@ -281,6 +323,14 @@ function Home() {
           onHover={handleAsteroidHover}
           onHoverEnd={handleAsteroidHoverEnd}
         />
+        {showSatellites && (
+          <SatelliteLayer
+            satellites={satelliteData}
+            selectedId={selectedSatellite?.id || null}
+            onSelect={setSelectedSatellite}
+            satellitePositionsRef={satellitePositionsRef}
+          />
+        )}
         <DistanceLine
           positionsRef={positionsRef}
           selectedId={selectedAsteroid?.id || null}
@@ -290,9 +340,11 @@ function Home() {
         <CameraController
           selectedAsteroid={selectedAsteroid}
           positionsRef={positionsRef}
+          selectedSatellite={showSatellites ? selectedSatellite : null}
+          satellitePositionsRef={satellitePositionsRef}
           enablePan
           enableZoom
-          minDistance={4}
+          minDistance={showSatellites && selectedSatellite ? 1.8 : 4}
           maxDistance={1400}
           maxPolarAngle={Math.PI - 0.12}
           minPolarAngle={0.2}

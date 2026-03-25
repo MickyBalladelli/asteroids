@@ -38,6 +38,11 @@ function TopBar({
   onSizeFilterChange,
   asteroids,
   onSelectAsteroid,
+  showSatellites,
+  onToggleSatellites,
+  satellites,
+  selectedSatelliteId,
+  onSelectSatellite,
 }) {
   const [aboutOpen, setAboutOpen] = useState(false)
 
@@ -70,10 +75,11 @@ function TopBar({
               fontSize: '1.5rem',
               fontWeight: 600,
               letterSpacing: 0.4,
-              color: '#65F9FF',
+              color: showSatellites ? '#00e5b0' : '#65F9FF',
+              transition: 'color 0.3s',
             }}
           >
-            Asteroid Tracker
+            {showSatellites ? 'Satellite Tracker' : 'Asteroid Tracker'}
           </Typography>
           <Typography
             sx={{
@@ -84,7 +90,7 @@ function TopBar({
               color: 'rgba(203, 213, 225, 0.8)',
             }}
           >
-            Near-Earth Object Visualization
+            {showSatellites ? 'Earth-Orbiting Stations' : 'Near-Earth Object Visualization'}
           </Typography>
         </Box>
 
@@ -97,71 +103,120 @@ function TopBar({
             gap: 2,
           }}
         >
-          <TimeSlider value={timePreset} onChange={onTimePresetChange} />
+          {!showSatellites && (
+            <>
+              <TimeSlider value={timePreset} onChange={onTimePresetChange} />
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={hazardMode}
-                onChange={(event) => onToggleHazard(event.target.checked)}
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={hazardMode}
+                    onChange={(event) => onToggleHazard(event.target.checked)}
+                  />
+                }
+                label="Hazard Radar"
+                sx={{ m: 0, marginLeft: 10 }}
               />
-            }
-            label="Hazard Radar"
-            sx={{ m: 0, marginLeft: 10 }}
-          />
 
-          {hazardMode && (
-            <Select
-              size="small"
-              value={radarMode}
-              onChange={(e) => onRadarModeChange(e.target.value)}
-              sx={{
-                color: '#e0e8f5',
-                fontSize: '0.75rem',
-                height: 32,
-                '.MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(255,255,255,0.2)',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(255,255,255,0.4)',
-                },
-                '.MuiSelect-icon': { color: 'rgba(255,255,255,0.5)' },
-              }}
-              aria-label="Radar mode"
-            >
-              <MenuItem value="visual">Visual</MenuItem>
-              <MenuItem value="risk">Risk Weighted</MenuItem>
-              <MenuItem value="imminent">Imminent Only</MenuItem>
-            </Select>
+              {hazardMode && (
+                <Select
+                  size="small"
+                  value={radarMode}
+                  onChange={(e) => onRadarModeChange(e.target.value)}
+                  sx={{
+                    color: '#e0e8f5',
+                    fontSize: '0.75rem',
+                    height: 32,
+                    '.MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255,255,255,0.2)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255,255,255,0.4)',
+                    },
+                    '.MuiSelect-icon': { color: 'rgba(255,255,255,0.5)' },
+                  }}
+                  aria-label="Radar mode"
+                >
+                  <MenuItem value="visual">Visual</MenuItem>
+                  <MenuItem value="risk">Risk Weighted</MenuItem>
+                  <MenuItem value="imminent">Imminent Only</MenuItem>
+                </Select>
+              )}
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={atScale}
+                    onChange={(event) => onToggleAtScale(event.target.checked)}
+                  />
+                }
+                label="At Scale"
+                sx={{ m: 0 }}
+              />
+            </>
           )}
 
           <FormControlLabel
             control={
               <Switch
-                checked={atScale}
-                onChange={(event) => onToggleAtScale(event.target.checked)}
+                checked={showSatellites}
+                onChange={(event) => onToggleSatellites(event.target.checked)}
               />
             }
-            label="At Scale"
+            label="Satellites"
             sx={{ m: 0 }}
           />
 
-          <Box
-            sx={{
-              borderRadius: 1.5,
-              background: 'rgba(255,255,255,0.05)',
-              px: 1.5,
-              py: 1,
-              fontSize: '0.75rem',
-            }}
-          >
-            <Typography sx={{ m: 0, color: 'rgb(203, 213, 225)' }}>
-              Asteroids: {asteroidCount}
-            </Typography>
-            <Typography sx={{ m: 0, color: '#ff9a9a' }}>
-              Hazardous: {hazardousCount}
-            </Typography>
-          </Box>
+          {showSatellites && satellites && satellites.length > 0 && (
+            <Select
+              size="small"
+              value={selectedSatelliteId || ''}
+              onChange={(e) => {
+                const sat = satellites.find((s) => s.id === e.target.value)
+                if (sat) onSelectSatellite(sat)
+              }}
+              displayEmpty
+              sx={{
+                color: '#e0e8f5',
+                fontSize: '0.75rem',
+                height: 32,
+                minWidth: 160,
+                '.MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(0,230,176,0.35)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(0,230,176,0.65)',
+                },
+                '.MuiSelect-icon': { color: 'rgba(0,230,176,0.6)' },
+              }}
+              aria-label="Select satellite"
+            >
+              {satellites.map((sat) => (
+                <MenuItem key={sat.id} value={sat.id} sx={{ fontSize: '0.78rem' }}>
+                  {sat.name}
+                </MenuItem>
+              ))}
+            </Select>
+          )}
+
+          {!showSatellites && (
+            <Box
+              sx={{
+                borderRadius: 1.5,
+                background: 'rgba(255,255,255,0.05)',
+                px: 1.5,
+                py: 1,
+                fontSize: '0.75rem',
+              }}
+            >
+              <Typography sx={{ m: 0, color: 'rgb(203, 213, 225)' }}>
+                Asteroids: {asteroidCount}
+              </Typography>
+              <Typography sx={{ m: 0, color: '#ff9a9a' }}>
+                Hazardous: {hazardousCount}
+              </Typography>
+            </Box>
+          )}
 
           {loading && <CircularProgress size={22} color="info" />}
 
@@ -185,22 +240,24 @@ function TopBar({
         </Box>
       </Box>
 
-      <Box sx={{ mt: 1.25, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
-        <SearchFilter
-          inline
-          searchText={searchText}
-          onSearchChange={onSearchChange}
-          onSearchSelect={onSearchSelect}
-          searchOptions={searchOptions}
-          hazardFilter={hazardFilter}
-          onHazardFilterChange={onHazardFilterChange}
-          sizeFilter={sizeFilter}
-          onSizeFilterChange={onSizeFilterChange}
-        />
-        {hazardMode && asteroids && asteroids.length > 0 && (
-          <ThreatPanel asteroids={asteroids} onSelect={onSelectAsteroid} />
-        )}
-      </Box>
+      {!showSatellites && (
+        <Box sx={{ mt: 1.25, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
+          <SearchFilter
+            inline
+            searchText={searchText}
+            onSearchChange={onSearchChange}
+            onSearchSelect={onSearchSelect}
+            searchOptions={searchOptions}
+            hazardFilter={hazardFilter}
+            onHazardFilterChange={onHazardFilterChange}
+            sizeFilter={sizeFilter}
+            onSizeFilterChange={onSizeFilterChange}
+          />
+          {hazardMode && asteroids && asteroids.length > 0 && (
+            <ThreatPanel asteroids={asteroids} onSelect={onSelectAsteroid} />
+          )}
+        </Box>
+      )}
 
       <Dialog
         open={aboutOpen}
@@ -215,8 +272,8 @@ function TopBar({
           },
         }}
       >
-        <DialogTitle sx={{ pb: 1, color: '#65F9FF', fontWeight: 700 }}>
-          About Asteroid Tracker
+        <DialogTitle sx={{ pb: 1, color: showSatellites ? '#00e5b0' : '#65F9FF', fontWeight: 700 }}>
+          About {showSatellites ? 'Satellite Tracker' : 'Asteroid Tracker'}
         </DialogTitle>
 
         <DialogContent dividers sx={{ borderColor: 'rgba(140,170,220,0.22)' }}>
