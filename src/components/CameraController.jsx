@@ -56,38 +56,38 @@ function CameraController({
       return
     }
 
-    controls.update()
-
-    _offset.copy(state.camera.position).sub(controls.target)
-    if (_offset.lengthSq() < 1e-6) {
-      _offset.set(0, 1.6, 8)
-    }
-    _offset.normalize().multiplyScalar(followDistRef.current)
-
     const camera = state.camera
     const t = 1 - Math.pow(0.03, delta)
 
     if (transitioningRef.current) {
-      // Lerp both orbit target and camera distance simultaneously
+      // Lerp orbit target and zoom distance simultaneously
       controls.target.lerp(targetPos, t)
       followDistRef.current = THREE.MathUtils.lerp(followDistRef.current, targetFollowDistRef.current, t)
-      const donePos = controls.target.distanceTo(targetPos) < 0.02
-      const doneDist = Math.abs(followDistRef.current - targetFollowDistRef.current) < 0.05
-      if (donePos && doneDist) {
-        controls.target.copy(targetPos)
-        followDistRef.current = targetFollowDistRef.current
+
+      // Reposition camera along current direction at lerped distance
+      _offset.copy(camera.position).sub(controls.target)
+      if (_offset.lengthSq() < 1e-6) _offset.set(0, 1.6, 8)
+      _offset.normalize().multiplyScalar(followDistRef.current)
+      camera.position.copy(controls.target).add(_offset)
+
+      // Finish transition once the camera is close enough to the desired
+      // follow distance — checked against the satellite, not controls.target,
+      // so a fast-moving satellite can't prevent the transition from ending.
+      const camSatDist = camera.position.distanceTo(targetPos)
+      if (Math.abs(camSatDist - targetFollowDistRef.current) < 0.4) {
         transitioningRef.current = false
       }
     } else {
-      // Track target position; let user freely adjust zoom
+      // Translate camera + target together by the satellite's frame delta.
+      // This preserves the user's zoom distance and orbit angle exactly,
+      // and lets OrbitControls process scroll on top in controls.update().
+      _offset.copy(targetPos).sub(controls.target)
       controls.target.copy(targetPos)
-      const currentDist = state.camera.position.distanceTo(controls.target)
-      followDistRef.current = Math.max(currentDist, MIN_SAFE_DISTANCE)
+      camera.position.add(_offset)
     }
 
-    camera.position.copy(controls.target).add(_offset)
-    camera.lookAt(controls.target)
-
+    // Single controls.update() — applies user scroll/orbit input and
+    // syncs OrbitControls' internal state to our manually set positions.
     controls.update()
   })
 
