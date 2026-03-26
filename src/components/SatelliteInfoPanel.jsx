@@ -4,7 +4,10 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import Fade from '@mui/material/Fade'
+import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import * as satellite from 'satellite.js'
 
 const KM_TO_UNITS = 1.5 / 6371
@@ -20,7 +23,7 @@ function Row({ label, value }) {
   )
 }
 
-function SatelliteInfoPanel({ sat }) {
+function SatelliteInfoPanel({ sat, currentIndex, totalCount, onPrev, onNext }) {
   const [altKm, setAltKm] = useState(null)
 
   // Recompute live altitude every second
@@ -82,6 +85,20 @@ function SatelliteInfoPanel({ sat }) {
                 }}
               />
             </Box>
+
+            {totalCount > 1 && (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.75, pointerEvents: 'all' }}>
+                <IconButton size="small" onClick={onPrev} sx={{ color: '#00e5b0', p: 0.5 }}>
+                  <ChevronLeftIcon fontSize="small" />
+                </IconButton>
+                <Typography sx={{ fontSize: '0.72rem', color: 'rgba(180,220,255,0.7)' }}>
+                  {currentIndex + 1} / {totalCount}
+                </Typography>
+                <IconButton size="small" onClick={onNext} sx={{ color: '#00e5b0', p: 0.5 }}>
+                  <ChevronRightIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            )}
 
             <Divider sx={{ my: 1.25, borderColor: 'rgba(0,230,176,0.2)' }} />
 

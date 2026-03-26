@@ -2,6 +2,10 @@ import { useFrame } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import * as satellite from 'satellite.js'
+
+// How many simulation-seconds pass per real second (60× = ISS orbits in ~92 real seconds)
+const SIM_SPEED = 60
 
 const EARTH_DAY =
   'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'
@@ -10,7 +14,7 @@ const EARTH_NORMAL =
 const EARTH_SPEC =
   'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'
 
-function Earth() {
+function Earth({ simTimeRef }) {
   const meshRef = useRef()
   const atmosphereRef = useRef()
 
@@ -56,12 +60,18 @@ function Earth() {
   )
 
   useFrame((state, delta) => {
+    // Advance the shared simulation clock
+    if (simTimeRef) simTimeRef.current += delta * 1000 * SIM_SPEED
+
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.08
+      // Derive Earth rotation from GMST so it stays in sync with ECI satellite positions
+      const gmst = satellite.gstime(new Date(simTimeRef ? simTimeRef.current : Date.now()))
+      // rotation.y = gmst - π/2 aligns the prime-meridian texture with the ECI X axis
+      meshRef.current.rotation.y = gmst - Math.PI / 2
     }
 
     if (atmosphereRef.current) {
-      atmosphereRef.current.rotation.y += delta * 0.03
+      atmosphereRef.current.rotation.y += delta * SIM_SPEED * 7.2921150e-5
       atmosphereMaterial.uniforms.viewVector.value = state.camera.position
     }
   })

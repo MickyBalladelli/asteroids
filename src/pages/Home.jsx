@@ -74,6 +74,7 @@ function Home() {
 
   const positionsRef = useRef({})
   const satellitePositionsRef = useRef({})
+  const simTimeRef = useRef(Date.now())
   const daysAhead = PRESET_TO_DAYS[timePreset]
   const { asteroids, loading, stats } = useAsteroids(daysAhead, atScale)
   const { satellites: satelliteData } = useSatellites(showSatellites)
@@ -207,6 +208,46 @@ function Home() {
     setHoverInfo(null)
   }, [])
 
+  const [satHoverInfo, setSatHoverInfo] = useState(null)
+  const mousePos = useRef({ x: 0, y: 0 })
+  const satHoverClearRef = useRef(null)
+
+  // Track real mouse coords independently from R3F events
+  useEffect(() => {
+    const track = (e) => {
+      mousePos.current = { x: e.clientX, y: e.clientY }
+      setSatHoverInfo((prev) => prev ? { ...prev, x: e.clientX, y: e.clientY } : prev)
+    }
+    window.addEventListener('mousemove', track)
+    return () => window.removeEventListener('mousemove', track)
+  }, [])
+
+  const handleSatHover = useCallback((sat) => {
+    if (satHoverClearRef.current) { clearTimeout(satHoverClearRef.current); satHoverClearRef.current = null }
+    setSatHoverInfo({ name: sat.name, x: mousePos.current.x, y: mousePos.current.y })
+  }, [])
+
+  const handleSatHoverEnd = useCallback(() => {
+    satHoverClearRef.current = setTimeout(() => setSatHoverInfo(null), 120)
+  }, [])
+
+  const selectedSatIndex = useMemo(() => {
+    if (!selectedSatellite) return -1
+    return satelliteData.findIndex((s) => s.id === selectedSatellite.id)
+  }, [satelliteData, selectedSatellite])
+
+  const handleSatPrev = useCallback(() => {
+    if (!satelliteData.length) return
+    const idx = selectedSatIndex <= 0 ? satelliteData.length - 1 : selectedSatIndex - 1
+    setSelectedSatellite(satelliteData[idx])
+  }, [satelliteData, selectedSatIndex])
+
+  const handleSatNext = useCallback(() => {
+    if (!satelliteData.length) return
+    const idx = selectedSatIndex >= satelliteData.length - 1 ? 0 : selectedSatIndex + 1
+    setSelectedSatellite(satelliteData[idx])
+  }, [satelliteData, selectedSatIndex])
+
   const hoverDistanceLabel = useMemo(() => {
     if (!hoverInfo) return ''
     return Number(hoverInfo.distanceKm || 0).toLocaleString(undefined, {
@@ -286,7 +327,13 @@ function Home() {
             pointerEvents: 'none',
           }}
         >
-          <SatelliteInfoPanel sat={selectedSatellite} />
+          <SatelliteInfoPanel
+              sat={selectedSatellite}
+              currentIndex={selectedSatIndex}
+              totalCount={satelliteData.length}
+              onPrev={handleSatPrev}
+              onNext={handleSatNext}
+            />
         </Box>
       )}
 
@@ -317,7 +364,7 @@ function Home() {
         />
         <pointLight position={[-12, -4, -9]} intensity={0.22} color="#4e6cff" />
 
-        <Earth />
+        <Earth simTimeRef={simTimeRef} />
         <Radar enabled={hazardMode} maxThreatScore={maxThreatScore} />
         <AsteroidField
           asteroids={displayedAsteroids}
@@ -334,6 +381,7 @@ function Home() {
             selectedId={selectedSatellite?.id || null}
             onSelect={setSelectedSatellite}
             satellitePositionsRef={satellitePositionsRef}
+            simTimeRef={simTimeRef}
           />
         )}
         <DistanceLine
@@ -355,6 +403,32 @@ function Home() {
           minPolarAngle={0.2}
         />
       </Canvas>
+
+      {satHoverInfo && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: satHoverInfo.x + 14,
+            top: satHoverInfo.y + 14,
+            zIndex: 40,
+            pointerEvents: 'none',
+            px: 1.2,
+            py: 0.7,
+            borderRadius: 1.5,
+            background: 'rgba(4, 20, 30, 0.92)',
+            border: '1px solid rgba(0, 230, 176, 0.45)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+            minWidth: 120,
+          }}
+        >
+          <Box
+            component="p"
+            sx={{ m: 0, fontSize: '0.76rem', fontWeight: 600, color: '#65f9ff', lineHeight: 1.35 }}
+          >
+            {satHoverInfo.name}
+          </Box>
+        </Box>
+      )}
 
       {hoverInfo && (
         <Box

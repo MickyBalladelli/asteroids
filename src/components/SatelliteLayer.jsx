@@ -46,7 +46,7 @@ function SatelliteModel({ isSelected }) {
   )
 }
 
-const SatelliteDot = memo(function SatelliteDot({ sat, isSelected, onSelect, satellitePositionsRef }) {
+const SatelliteDot = memo(function SatelliteDot({ sat, isSelected, onSelect, satellitePositionsRef, simTimeRef, onHover, onHoverOut }) {
   const groupRef = useRef()
   const angleRef = useRef(Math.random() * Math.PI * 2)
 
@@ -61,7 +61,8 @@ const SatelliteDot = memo(function SatelliteDot({ sat, isSelected, onSelect, sat
 
   useFrame((_, delta) => {
     if (!groupRef.current) return
-    const pv = satellite.propagate(sat.satrec, new Date())
+    const simDate = new Date(simTimeRef ? simTimeRef.current : Date.now())
+    const pv = satellite.propagate(sat.satrec, simDate)
     if (!pv?.position) return
     const pos = eciToVec3(pv.position)
     groupRef.current.position.copy(pos)
@@ -92,14 +93,13 @@ const SatelliteDot = memo(function SatelliteDot({ sat, isSelected, onSelect, sat
       </line>
 
       {/* Invisible sphere as generous click target */}
-      <mesh
-        ref={groupRef}
-        frustumCulled={false}
-        onClick={handleClick}
-        onPointerOver={() => { document.body.style.cursor = 'pointer' }}
-        onPointerOut={() => { document.body.style.cursor = 'auto' }}
-      >
-        <mesh geometry={HIT_GEO}>
+      <mesh ref={groupRef} frustumCulled={false} onClick={handleClick}>
+        <mesh
+          geometry={HIT_GEO}
+          onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; onHover && onHover(sat) }}
+          onPointerMove={() => { onHover && onHover(sat) }}
+          onPointerOut={() => { document.body.style.cursor = 'auto'; onHoverOut && onHoverOut() }}
+        >
           <meshBasicMaterial visible={false} />
         </mesh>
         <SatelliteModel isSelected={isSelected} />
@@ -108,7 +108,7 @@ const SatelliteDot = memo(function SatelliteDot({ sat, isSelected, onSelect, sat
   )
 })
 
-function SatelliteLayer({ satellites, selectedId, onSelect, satellitePositionsRef }) {
+function SatelliteLayer({ satellites, selectedId, onSelect, satellitePositionsRef, simTimeRef, onHover, onHoverOut }) {
   if (!satellites.length) return null
   return (
     <group>
@@ -119,6 +119,9 @@ function SatelliteLayer({ satellites, selectedId, onSelect, satellitePositionsRe
           isSelected={sat.id === selectedId}
           onSelect={onSelect}
           satellitePositionsRef={satellitePositionsRef}
+          simTimeRef={simTimeRef}
+          onHover={onHover}
+          onHoverOut={onHoverOut}
         />
       ))}
     </group>

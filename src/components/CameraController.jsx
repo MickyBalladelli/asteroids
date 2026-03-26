@@ -7,7 +7,7 @@ const _offset = new THREE.Vector3()
 
 const MIN_SAFE_DISTANCE = 2
 const DEFAULT_FOLLOW_DISTANCE = 16
-const SATELLITE_FOLLOW_DISTANCE = 2
+const SATELLITE_FOLLOW_DISTANCE = 2.5
 
 function CameraController({
   selectedAsteroid,
@@ -20,6 +20,7 @@ function CameraController({
   const prevIdRef = useRef(null)
   const transitioningRef = useRef(false)
   const followDistRef = useRef(DEFAULT_FOLLOW_DISTANCE)
+  const targetFollowDistRef = useRef(DEFAULT_FOLLOW_DISTANCE)
 
   useFrame((state, delta) => {
     const controls = controlsRef.current
@@ -36,7 +37,9 @@ function CameraController({
       prevIdRef.current = id
       transitioningRef.current = isNewSelection
       if (isNewSelection) {
-        followDistRef.current = defaultFollowDist
+        // Start from current distance and animate toward the desired follow distance
+        followDistRef.current = state.camera.position.distanceTo(controls.target)
+        targetFollowDistRef.current = defaultFollowDist
       }
     }
 
@@ -55,9 +58,6 @@ function CameraController({
 
     controls.update()
 
-    const currentDist = state.camera.position.distanceTo(controls.target)
-    followDistRef.current = Math.max(currentDist, MIN_SAFE_DISTANCE)
-
     _offset.copy(state.camera.position).sub(controls.target)
     if (_offset.lengthSq() < 1e-6) {
       _offset.set(0, 1.6, 8)
@@ -68,13 +68,21 @@ function CameraController({
     const t = 1 - Math.pow(0.03, delta)
 
     if (transitioningRef.current) {
+      // Lerp both orbit target and camera distance simultaneously
       controls.target.lerp(targetPos, t)
-      if (controls.target.distanceTo(targetPos) < 0.02) {
+      followDistRef.current = THREE.MathUtils.lerp(followDistRef.current, targetFollowDistRef.current, t)
+      const donePos = controls.target.distanceTo(targetPos) < 0.02
+      const doneDist = Math.abs(followDistRef.current - targetFollowDistRef.current) < 0.05
+      if (donePos && doneDist) {
         controls.target.copy(targetPos)
+        followDistRef.current = targetFollowDistRef.current
         transitioningRef.current = false
       }
     } else {
+      // Track target position; let user freely adjust zoom
       controls.target.copy(targetPos)
+      const currentDist = state.camera.position.distanceTo(controls.target)
+      followDistRef.current = Math.max(currentDist, MIN_SAFE_DISTANCE)
     }
 
     camera.position.copy(controls.target).add(_offset)

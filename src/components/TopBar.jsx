@@ -276,7 +276,7 @@ function TopBar({
 
         <DialogContent dividers sx={{ borderColor: 'rgba(140,170,220,0.22)' }}>
           <Typography sx={{ m: 0, mb: 1.1, fontSize: '0.95rem' }}>
-            Author: <strong>Micky Balladelli</strong>
+            Authors: <strong>Micky Balladelli</strong>, assisted by <strong>Claude</strong>
           </Typography>
 
           <Typography sx={{ m: 0, mb: 1.1, fontSize: '0.9rem', lineHeight: 1.55 }}>
