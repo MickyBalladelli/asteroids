@@ -14,6 +14,7 @@ import SatelliteLayer from '../components/SatelliteLayer'
 import SatelliteInfoPanel from '../components/SatelliteInfoPanel'
 import useAsteroids from '../hooks/useAsteroids'
 import useSatellites from '../hooks/useSatellites'
+import useDraggable from '../hooks/useDraggable'
 
 const PRESET_TO_DAYS = [0, 7, 30]
 
@@ -208,6 +209,9 @@ function Home() {
     setHoverInfo(null)
   }, [])
 
+  const { pos: asteroidPanelPos, dragHandleProps: asteroidDragProps } = useDraggable(null)
+  const { pos: satellitePanelPos, dragHandleProps: satelliteDragProps } = useDraggable(null)
+
   const [satHoverInfo, setSatHoverInfo] = useState(null)
   const mousePos = useRef({ x: 0, y: 0 })
   const satHoverClearRef = useRef(null)
@@ -297,16 +301,19 @@ function Home() {
         onSelectSatellite={setSelectedSatellite}
       />
 
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: 24,
-          left: 24,
-          zIndex: 20,
-          pointerEvents: 'none',
-        }}
-      >
-        {!showSatellites && selectedAsteroid && (
+      {!showSatellites && selectedAsteroid && (
+        <Box
+          {...asteroidDragProps}
+          sx={{
+            position: 'fixed',
+            ...(asteroidPanelPos
+              ? { left: asteroidPanelPos.x, top: asteroidPanelPos.y }
+              : { bottom: 24, left: 24 }),
+            zIndex: 20,
+            pointerEvents: 'auto',
+            userSelect: 'none',
+          }}
+        >
           <InfoPanel
             asteroid={selectedAsteroid}
             currentIndex={selectedIndex}
@@ -314,26 +321,29 @@ function Home() {
             onPrev={handlePrev}
             onNext={handleNext}
           />
-        )}
-      </Box>
+        </Box>
+      )}
 
       {showSatellites && selectedSatellite && (
         <Box
+          {...satelliteDragProps}
           sx={{
-            position: 'absolute',
-            bottom: 24,
-            right: 24,
+            position: 'fixed',
+            ...(satellitePanelPos
+              ? { left: satellitePanelPos.x, top: satellitePanelPos.y }
+              : { bottom: 24, right: 24 }),
             zIndex: 20,
-            pointerEvents: 'none',
+            pointerEvents: 'auto',
+            userSelect: 'none',
           }}
         >
           <SatelliteInfoPanel
-              sat={selectedSatellite}
-              currentIndex={selectedSatIndex}
-              totalCount={satelliteData.length}
-              onPrev={handleSatPrev}
-              onNext={handleSatNext}
-            />
+            sat={selectedSatellite}
+            currentIndex={selectedSatIndex}
+            totalCount={satelliteData.length}
+            onPrev={handleSatPrev}
+            onNext={handleSatNext}
+          />
         </Box>
       )}
 
