@@ -136,7 +136,24 @@ function TopBar({
             ))}
           </Select>
         )}
-
+        {!showSatellites && (
+          <Box sx={{ mt: 1.25, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
+            <SearchFilter
+              inline
+              searchText={searchText}
+              onSearchChange={onSearchChange}
+              onSearchSelect={onSearchSelect}
+              searchOptions={searchOptions}
+              hazardFilter={hazardFilter}
+              onHazardFilterChange={onHazardFilterChange}
+              sizeFilter={sizeFilter}
+              onSizeFilterChange={onSizeFilterChange}
+            />
+            {hazardMode && asteroids && asteroids.length > 0 && (
+              <ThreatPanel asteroids={asteroids} onSelect={onSelectAsteroid} />
+            )}
+          </Box>
+        )}
         <Box
           sx={{
             ml: 'auto',
@@ -237,26 +254,6 @@ function TopBar({
           </Button>
         </Box>
       </Box>
-
-      {!showSatellites && (
-        <Box sx={{ mt: 1.25, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
-          <SearchFilter
-            inline
-            searchText={searchText}
-            onSearchChange={onSearchChange}
-            onSearchSelect={onSearchSelect}
-            searchOptions={searchOptions}
-            hazardFilter={hazardFilter}
-            onHazardFilterChange={onHazardFilterChange}
-            sizeFilter={sizeFilter}
-            onSizeFilterChange={onSizeFilterChange}
-          />
-          {hazardMode && asteroids && asteroids.length > 0 && (
-            <ThreatPanel asteroids={asteroids} onSelect={onSelectAsteroid} />
-          )}
-        </Box>
-      )}
-
       <Dialog
         open={aboutOpen}
         onClose={() => setAboutOpen(false)}
