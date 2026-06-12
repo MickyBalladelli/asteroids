@@ -310,7 +310,11 @@ function Home() {
         showSatellites={showSatellites}
         onToggleSatellites={(val) => {
           setShowSatellites(val)
-          if (val) setSelectedAsteroid(null)
+          if (val) {
+            setSelectedAsteroid(null)
+            setHazardMode(false)
+            setRadarMode('visual')
+          }
         }}
         satellites={satelliteData}
         selectedSatelliteId={selectedSatellite?.id || null}
