@@ -69,6 +69,7 @@ function Home() {
   const [hazardFilter, setHazardFilter] = useState('all')
   const [sizeFilter, setSizeFilter] = useState('all')
   const [hoverInfo, setHoverInfo] = useState(null)
+  const [cameraFocus, setCameraFocus] = useState('object')
 
   const [showSatellites, setShowSatellites] = useState(false)
   const [selectedSatellite, setSelectedSatellite] = useState(null)
@@ -170,6 +171,7 @@ function Home() {
       const match = filterScopedAsteroids.find((asteroid) => asteroid.name === name)
       if (match) {
         setSelectedAsteroid(match)
+        setCameraFocus('object')
       }
     },
     [filterScopedAsteroids],
@@ -184,13 +186,20 @@ function Home() {
     if (filteredAsteroids.length === 0) return
     const idx = selectedIndex <= 0 ? filteredAsteroids.length - 1 : selectedIndex - 1
     setSelectedAsteroid(filteredAsteroids[idx])
+    setCameraFocus('object')
   }, [filteredAsteroids, selectedIndex])
 
   const handleNext = useCallback(() => {
     if (filteredAsteroids.length === 0) return
     const idx = selectedIndex >= filteredAsteroids.length - 1 ? 0 : selectedIndex + 1
     setSelectedAsteroid(filteredAsteroids[idx])
+    setCameraFocus('object')
   }, [filteredAsteroids, selectedIndex])
+
+  const handleSelectAsteroid = useCallback((asteroid) => {
+    setSelectedAsteroid(asteroid)
+    setCameraFocus('object')
+  }, [])
 
   const handleAsteroidHover = useCallback((event, asteroid) => {
     const sourceEvent = event?.nativeEvent || event
@@ -244,13 +253,20 @@ function Home() {
     if (!satelliteData.length) return
     const idx = selectedSatIndex <= 0 ? satelliteData.length - 1 : selectedSatIndex - 1
     setSelectedSatellite(satelliteData[idx])
+    setCameraFocus('object')
   }, [satelliteData, selectedSatIndex])
 
   const handleSatNext = useCallback(() => {
     if (!satelliteData.length) return
     const idx = selectedSatIndex >= satelliteData.length - 1 ? 0 : selectedSatIndex + 1
     setSelectedSatellite(satelliteData[idx])
+    setCameraFocus('object')
   }, [satelliteData, selectedSatIndex])
+
+  const handleSelectSatellite = useCallback((satellite) => {
+    setSelectedSatellite(satellite)
+    setCameraFocus('object')
+  }, [])
 
   const hoverDistanceLabel = useMemo(() => {
     if (!hoverInfo) return ''
@@ -290,7 +306,7 @@ function Home() {
         sizeFilter={sizeFilter}
         onSizeFilterChange={setSizeFilter}
         asteroids={displayedAsteroids}
-        onSelectAsteroid={setSelectedAsteroid}
+        onSelectAsteroid={handleSelectAsteroid}
         showSatellites={showSatellites}
         onToggleSatellites={(val) => {
           setShowSatellites(val)
@@ -298,7 +314,9 @@ function Home() {
         }}
         satellites={satelliteData}
         selectedSatelliteId={selectedSatellite?.id || null}
-        onSelectSatellite={setSelectedSatellite}
+        onSelectSatellite={handleSelectSatellite}
+        cameraFocus={cameraFocus}
+        onCameraFocusChange={setCameraFocus}
       />
 
       {!showSatellites && selectedAsteroid && (
@@ -379,7 +397,7 @@ function Home() {
         <AsteroidField
           asteroids={displayedAsteroids}
           hazardMode={hazardMode}
-          onSelect={setSelectedAsteroid}
+          onSelect={handleSelectAsteroid}
           selectedId={showSatellites ? null : (selectedAsteroid?.id || null)}
           positionsRef={positionsRef}
           onHover={handleAsteroidHover}
@@ -389,7 +407,7 @@ function Home() {
           <SatelliteLayer
             satellites={satelliteData}
             selectedId={selectedSatellite?.id || null}
-            onSelect={setSelectedSatellite}
+            onSelect={handleSelectSatellite}
             satellitePositionsRef={satellitePositionsRef}
             simTimeRef={simTimeRef}
           />
@@ -405,6 +423,7 @@ function Home() {
           positionsRef={positionsRef}
           selectedSatellite={showSatellites ? selectedSatellite : null}
           satellitePositionsRef={satellitePositionsRef}
+          cameraFocus={cameraFocus}
           enablePan
           enableZoom
           minDistance={showSatellites && selectedSatellite ? 1.8 : 4}

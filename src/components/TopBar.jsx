@@ -15,6 +15,7 @@ import Link from '@mui/material/Link'
 import TimeSlider from './TimeSlider'
 import SearchFilter from './SearchFilter'
 import ThreatPanel from './ThreatPanel'
+import FocusTargetControl from './FocusTargetControl'
 
 function TopBar({
   timePreset,
@@ -43,6 +44,8 @@ function TopBar({
   satellites,
   selectedSatelliteId,
   onSelectSatellite,
+  cameraFocus,
+  onCameraFocusChange,
 }) {
   const [aboutOpen, setAboutOpen] = useState(false)
 
@@ -136,6 +139,12 @@ function TopBar({
             ))}
           </Select>
         )}
+        <FocusTargetControl
+          value={cameraFocus}
+          onChange={onCameraFocusChange}
+          objectLabel={showSatellites ? 'Satellite' : 'Asteroid'}
+          disabled={showSatellites ? !selectedSatelliteId : false}
+        />
         {!showSatellites && (
           <Box sx={{ mt: 1.25, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
             <SearchFilter

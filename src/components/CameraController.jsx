@@ -4,16 +4,18 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
 const _delta = new THREE.Vector3()
+const _earthTarget = new THREE.Vector3(0, 0, 0)
 
 function CameraController({
   selectedAsteroid,
   positionsRef,
   selectedSatellite,
   satellitePositionsRef,
+  cameraFocus = 'object',
   ...orbitProps
 }) {
   const controlsRef = useRef()
-  const prevIdRef = useRef(null)
+  const prevFocusKeyRef = useRef(null)
   const transitioningRef = useRef(false)
 
   useFrame((state, delta) => {
@@ -24,16 +26,16 @@ function CameraController({
     const activeRef = selectedSatellite ? satellitePositionsRef : positionsRef
 
     const id = activeTarget?.id ?? null
-    if (id !== prevIdRef.current) {
-      prevIdRef.current = id
-      transitioningRef.current = Boolean(id)
+    const targetPos = cameraFocus === 'earth' ? _earthTarget : activeRef?.current?.[id]
+    const focusKey = cameraFocus === 'earth' ? 'earth' : id
+
+    if (focusKey !== prevFocusKeyRef.current) {
+      prevFocusKeyRef.current = focusKey
+      transitioningRef.current = Boolean(focusKey)
     }
 
-    controls.enablePan = id ? false : (orbitProps.enablePan ?? true)
+    controls.enablePan = targetPos ? false : (orbitProps.enablePan ?? true)
 
-    if (!id) return
-
-    const targetPos = activeRef?.current?.[id]
     if (!targetPos) return
 
     const camera = state.camera
